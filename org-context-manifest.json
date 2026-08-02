@@ -1,14 +1,14 @@
 {
   "files": {
-    ".github/workflows/org-context-integrity.yml": "25fda729809c668a1bb7d120f5e89ac274ee7a7ade8dde1bc21f093d4a80408b",
+    ".github/workflows/org-context-integrity.yml": "fb3af098ad3c4f38dcba5cc6dc1e925659fb467a4578d4a3c53af6bcdf00019c",
     "README.md": "17c368ff45553eadfb8acc7ba26940321cf12025e4810919eb10d477345e7efc",
-    "agents/org-context.agent.md": "be3c9adfe81d360c323c5906594de4fd3406b4f3da043224b9fd904f774db9ca",
-    "profile/README.md": "ca44b1b4e2cb22486546da9b075502ac57bf3367ab060395286ffbf2ea0460f8",
-    "project-context.yaml": "52ef2ef9ec1f0937ea5e2152f4dbccf4ec83361a46cace58ea808e49a79909d8"
+    "agents/org-context.agent.md": "26b2ebd9f017be20f4fd7c445257291a8fb7e266228aa7209eab923d66e6159c",
+    "profile/README.md": "1d8e8535ba29155e189a21fbad2954d881fe831ad872d7c790c52aad03d1eae0",
+    "project-context.yaml": "4de904fd711ab2aa24fe9dd4ad1b5ad1fff5fd841bb53d3aef485fdaef88112b"
   },
   "github_account_id": 307325286,
   "github_owner": "shared-auth",
-  "registry_ref": "7929612d92e6aa37f966326cc1a50b4dcd150f3a",
+  "registry_ref": "d3e03ecc2e175a7f6261523d35c73ac775c49942",
   "registry_sha256": "ded5ed46190521e978b85dfb8a6d63d2480536b52d9b3c5bfd1bb399f94c0a9d",
   "schema_version": 1
 }
