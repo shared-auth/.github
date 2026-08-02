@@ -45,7 +45,7 @@ jobs:
         shell: bash
         env:
           EXPECTED_OWNER: "shared-auth"
-          REGISTRY_REF: "7929612d92e6aa37f966326cc1a50b4dcd150f3a"
+          REGISTRY_REF: "d3e03ecc2e175a7f6261523d35c73ac775c49942"
           REGISTRY_REPOSITORY: "ORESoftware/ai-agent-coordinator.rs"
         run: |
           set -euo pipefail
