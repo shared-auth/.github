@@ -3,9 +3,12 @@
   "generated_from": {
     "repository": "ORESoftware/ai-agent-coordinator.rs",
     "path": "config/org-project-registry.yaml",
-    "ref": "f312bcdc904e2a46ff68267be6f0ba358471742e",
+    "ref": "7929612d92e6aa37f966326cc1a50b4dcd150f3a",
+    "ref_type": "commit",
+    "immutable": true,
     "canonical_sha256": "ded5ed46190521e978b85dfb8a6d63d2480536b52d9b3c5bfd1bb399f94c0a9d",
-    "url": "https://github.com/ORESoftware/ai-agent-coordinator.rs/blob/f312bcdc904e2a46ff68267be6f0ba358471742e/config/org-project-registry.yaml"
+    "url": "https://github.com/ORESoftware/ai-agent-coordinator.rs/blob/7929612d92e6aa37f966326cc1a50b4dcd150f3a/config/org-project-registry.yaml",
+    "raw_url": "https://raw.githubusercontent.com/ORESoftware/ai-agent-coordinator.rs/7929612d92e6aa37f966326cc1a50b4dcd150f3a/config/org-project-registry.yaml"
   },
   "github": {
     "login": "shared-auth",
@@ -67,8 +70,12 @@
     "required_outcome": "preserve compatible intent, invariants, APIs, schemas, migrations, tests, documentation, security controls, and operational safeguards from every relevant side"
   },
   "mirrors": {
+    "github_repository": "shared-auth/.github",
     "github_profile": "profile/README.md",
+    "github_project_context_url": "https://github.com/shared-auth/.github/blob/main/project-context.yaml",
     "github_custom_agent": "agents/org-context.agent.md",
+    "github_integrity_workflow": ".github/workflows/org-context-integrity.yml",
+    "bundle_manifest": "org-context-manifest.json",
     "linear_document_title": "AI Agent Context",
     "linear_marker": "org-project-context:v1"
   },
