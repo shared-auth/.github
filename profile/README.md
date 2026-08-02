@@ -8,7 +8,7 @@ This organization is mapped to the Linear project [github.com/shared-auth](https
 - Linear project ID: `4bbe0ba4-d7f1-49ce-8f41-afd2cff6c2a2`
 - Linear team: `DEN` (`eb8ab169-5afe-4b6f-9cab-3f2aa3e887dc`)
 - Machine-readable context: [`project-context.yaml`](https://github.com/shared-auth/.github/blob/main/project-context.yaml)
-- Canonical registry: [`ORESoftware/ai-agent-coordinator.rs/config/org-project-registry.yaml`](https://github.com/ORESoftware/ai-agent-coordinator.rs/blob/7929612d92e6aa37f966326cc1a50b4dcd150f3a/config/org-project-registry.yaml)
+- Canonical registry: [`ORESoftware/ai-agent-coordinator.rs/config/org-project-registry.yaml`](https://github.com/ORESoftware/ai-agent-coordinator.rs/blob/d3e03ecc2e175a7f6261523d35c73ac775c49942/config/org-project-registry.yaml)
 
 The reviewed runtime entry defaults to [`shared-auth/shared-auth-mcp-server.rs`](https://github.com/shared-auth/shared-auth-mcp-server.rs) within its explicit allowlist.
 
