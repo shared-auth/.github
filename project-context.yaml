@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "generated_from": {
+    "repository": "ORESoftware/ai-agent-coordinator.rs",
+    "path": "config/org-project-registry.yaml",
+    "ref": "9b215c93bd1f4aeb708bf5c4a03bbb5fab5b2ce3",
+    "canonical_sha256": "ded5ed46190521e978b85dfb8a6d63d2480536b52d9b3c5bfd1bb399f94c0a9d",
+    "url": "https://github.com/ORESoftware/ai-agent-coordinator.rs/blob/9b215c93bd1f4aeb708bf5c4a03bbb5fab5b2ce3/config/org-project-registry.yaml"
+  },
+  "github": {
+    "login": "shared-auth",
+    "account_id": 307325286,
+    "account_type": "Organization",
+    "aliases": [
+      "github.com/shared-auth",
+      "shared-auth"
+    ]
+  },
+  "linear": {
+    "project_id": "4bbe0ba4-d7f1-49ce-8f41-afd2cff6c2a2",
+    "project_name": "github.com/shared-auth",
+    "project_url": "https://linear.app/denman/project/githubcomshared-auth-acbca07bb390",
+    "workspace_slug": "denman",
+    "team_id": "eb8ab169-5afe-4b6f-9cab-3f2aa3e887dc",
+    "team_key": "DEN"
+  },
+  "resolution": {
+    "owner_identity_key": "github_account_id",
+    "repository_override_precedence": true,
+    "on_unmapped": "reject",
+    "on_ambiguous": "reject",
+    "repository_selection": "explicit_or_runtime_allowlist"
+  },
+  "runtime_route": {
+    "slack_channel_id": "C0BMD90HED8",
+    "default_repository": "shared-auth/shared-auth-mcp-server.rs",
+    "repository_allowlist": [
+      "shared-auth/shared-auth-mcp-server.rs"
+    ],
+    "source_linear_issue": "DEN-1298"
+  },
+  "mirrors": {
+    "github_profile": "profile/README.md",
+    "github_custom_agent": "agents/org-context.agent.md",
+    "linear_document_title": "AI Agent Context",
+    "linear_marker": "org-project-context:v1"
+  },
+  "precedence": {
+    "identity_and_routing": "central_registry",
+    "implementation_instructions": "repository_local"
+  },
+  "public_context_only": true
+}
