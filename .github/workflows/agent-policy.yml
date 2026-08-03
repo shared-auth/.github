@@ -1,4 +1,4 @@
-name: Agent policy
+name: Agent policy reusable check
 
 on:
   workflow_call:
@@ -7,36 +7,23 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: shared-auth-agent-policy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-agent-policy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Check out caller repository
-        uses: actions/checkout@v4
-      - name: Verify required agent-safety declarations
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Validate policy, workflow pins, conflict markers, and credential patterns
         shell: bash
-        run: |
-          set -euo pipefail
-          if [[ ! -f AGENTS.md ]]; then
-            echo "::error file=AGENTS.md::Missing root AGENTS.md. Mirror the organization policy from shared-auth/.github."
-            exit 1
-          fi
-
-          required=(
-            "semantic conflict"
-            "3 and up to 10"
-            "git stash"
-            "git reset"
-            "git clean"
-            "git filter-repo"
-            "destructive"
-          )
-
-          for phrase in "${required[@]}"; do
-            if ! grep -Fqi "$phrase" AGENTS.md; then
-              echo "::error file=AGENTS.md::Missing required policy phrase: $phrase"
-              exit 1
-            fi
-          done
-
-          echo "Agent policy baseline is present."
+        run: bash scripts/validate-agent-policy.sh
+      - name: Exercise fail-closed validator fixtures
+        shell: bash
+        run: bash tests/agent-policy-validator.sh
