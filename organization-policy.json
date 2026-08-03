@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "work_tracking": {
+    "provider": "Linear",
+    "search_before_create": true,
+    "require_issue_before_implementation": true,
+    "require_pull_request_reference": true,
+    "require_status_and_validation_sync": true,
+    "tracked_categories": [
+      "feature",
+      "fix",
+      "enhancement",
+      "bug",
+      "security",
+      "reliability",
+      "documentation",
+      "technical_debt"
+    ],
+    "on_unmapped_or_ambiguous": "stop_and_report",
+    "untracked_drive_by_changes": "forbidden"
+  },
+  "safe_change_policy": {
+    "integration_strategy": "merge",
+    "directive": "avoid git rebase in favor of git merge",
+    "inspect_worktree_before_mutation_and_publish": true,
+    "preserve_uncommitted_and_untracked_work": true,
+    "on_unexpected_worktree_changes": "stop_and_report",
+    "force_push": "forbidden",
+    "bypass_required_checks": "forbidden",
+    "disable_security_controls": "forbidden",
+    "prohibited_git_commands": [
+      "git rebase",
+      "git stash",
+      "git reset",
+      "git clean",
+      "git filter-repo",
+      "git checkout --",
+      "git restore",
+      "git branch -D",
+      "git reflog expire",
+      "git gc --prune",
+      "git push --force",
+      "git push -f"
+    ],
+    "prohibited_filesystem_commands": [
+      "rm",
+      "mv",
+      "sed",
+      "find -delete",
+      "xargs rm",
+      "truncate",
+      "shred",
+      "dd"
+    ]
+  }
+}

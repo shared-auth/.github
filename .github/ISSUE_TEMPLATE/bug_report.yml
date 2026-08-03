@@ -1,0 +1,55 @@
+name: Bug report
+description: Report a reproducible defect
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: checkboxes
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched existing issues and documentation.
+          required: true
+        - label: I removed credentials, private data, and customer information.
+          required: true
+        - label: This is not a security vulnerability; security reports follow SECURITY.md.
+          required: true
+  - type: input
+    id: repository
+    attributes:
+      label: Affected repository
+      placeholder: owner/repository
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: release, tag, or commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide deterministic steps and the smallest safe example.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and diagnostics
+      description: Include relevant runtime, operating system, logs, and configuration with secrets removed.
+    validations:
+      required: true

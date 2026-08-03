@@ -1,12 +1,18 @@
-name: Semantic conflict policy
+name: Organization policy
 
 on:
   pull_request:
     paths:
       - AGENTS.md
       - CONTRIBUTING.md
+      - SECURITY.md
+      - SUPPORT.md
+      - CODE_OF_CONDUCT.md
+      - organization-policy.json
       - .github/copilot-instructions.md
       - .github/pull_request_template.md
+      - .github/ISSUE_TEMPLATE/**
+      - .github/workflows/reusable-organization-policy.yml
       - .github/workflows/semantic-conflict-policy.yml
       - agents/org-context.agent.md
       - org-context-manifest.json
@@ -19,8 +25,14 @@ on:
     paths:
       - AGENTS.md
       - CONTRIBUTING.md
+      - SECURITY.md
+      - SUPPORT.md
+      - CODE_OF_CONDUCT.md
+      - organization-policy.json
       - .github/copilot-instructions.md
       - .github/pull_request_template.md
+      - .github/ISSUE_TEMPLATE/**
+      - .github/workflows/reusable-organization-policy.yml
       - .github/workflows/semantic-conflict-policy.yml
       - agents/org-context.agent.md
       - org-context-manifest.json

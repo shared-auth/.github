@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the organization semantic Git conflict-resolution contract."""
+"""Validate the organization safe-change and semantic conflict-resolution contract."""
 
 from __future__ import annotations
 
@@ -14,6 +14,9 @@ from typing import Iterable, Mapping, Sequence
 MAX_POLICY_FILE_BYTES = 256 * 1024
 CONFLICT_MARKER_RE = re.compile(r"^(?:<<<<<<<|=======|>>>>>>>)", re.MULTILINE)
 HISTORY_RANGE_RE = re.compile(r"\b3\b[^\n]{0,48}\b10\b", re.IGNORECASE)
+LINEAR_REFERENCE_RE = re.compile(
+    r"(?:https://linear\.app/[^\s)]+|\b[A-Z][A-Z0-9]{1,15}-[1-9][0-9]*\b)"
+)
 
 HUMAN_POLICY_FILES = (
     Path("AGENTS.md"),
@@ -23,6 +26,53 @@ HUMAN_POLICY_FILES = (
     Path("profile/README.md"),
     Path("agents/org-context.agent.md"),
 )
+PRIMARY_CONTROL_FILES = (
+    Path("AGENTS.md"),
+    Path(".github/copilot-instructions.md"),
+    Path("CONTRIBUTING.md"),
+)
+COMMUNITY_FILES = (
+    Path("SECURITY.md"),
+    Path("SUPPORT.md"),
+    Path("CODE_OF_CONDUCT.md"),
+    Path(".github/ISSUE_TEMPLATE/bug_report.yml"),
+    Path(".github/ISSUE_TEMPLATE/feature_request.yml"),
+    Path(".github/ISSUE_TEMPLATE/config.yml"),
+)
+PROHIBITED_GIT_COMMANDS = (
+    "git rebase",
+    "git stash",
+    "git reset",
+    "git clean",
+    "git filter-repo",
+    "git checkout --",
+    "git restore",
+    "git branch -D",
+    "git reflog expire",
+    "git gc --prune",
+    "git push --force",
+    "git push -f",
+)
+PROHIBITED_FILESYSTEM_COMMANDS = (
+    "rm",
+    "mv",
+    "sed",
+    "find -delete",
+    "xargs rm",
+    "truncate",
+    "shred",
+    "dd",
+)
+TRACKED_CATEGORIES = {
+    "feature",
+    "fix",
+    "enhancement",
+    "bug",
+    "security",
+    "reliability",
+    "documentation",
+    "technical_debt",
+}
 
 
 def _display(path: Path, root: Path) -> str:
@@ -93,6 +143,37 @@ def _validate_human_policy(path: Path, text: str, errors: list[str]) -> None:
         errors.append(f"{label} must require post-resolution validation")
 
 
+def _validate_primary_controls(path: Path, text: str, errors: list[str]) -> None:
+    label = path.as_posix()
+    _require_all(
+        label=label,
+        text=text,
+        needles=(
+            "avoid git rebase in favor of git merge",
+            "git stash",
+            "git reset",
+            "git clean",
+            "git filter-repo",
+            "uncommitted",
+            "untracked",
+            "linear",
+            "before implementation",
+            "stop",
+        ),
+        errors=errors,
+    )
+    lowered = text.casefold()
+    for command in PROHIBITED_GIT_COMMANDS:
+        if command.casefold() not in lowered:
+            errors.append(f"{label} must name prohibited Git command: {command}")
+    for command in PROHIBITED_FILESYSTEM_COMMANDS:
+        if command.casefold() not in lowered:
+            errors.append(f"{label} must name prohibited filesystem command: {command}")
+    for category in ("feature", "fix", "enhancement", "bug"):
+        if category not in lowered:
+            errors.append(f"{label} must require Linear tracking for category: {category}")
+
+
 def _validate_primary_agent_instructions(
     documents: Mapping[Path, str], errors: list[str]
 ) -> None:
@@ -112,14 +193,23 @@ def _validate_pull_request_template(text: str | None, errors: list[str]) -> None
     if text is None:
         return
     checkbox_count = len(re.findall(r"^\s*-\s*\[[ xX]\]", text, re.MULTILINE))
-    if checkbox_count < 5:
+    if checkbox_count < 10:
         errors.append(
-            ".github/pull_request_template.md must contain at least five checklist items"
+            ".github/pull_request_template.md must contain at least ten checklist items"
         )
     _require_all(
         label=".github/pull_request_template.md",
         text=text,
-        needles=("merge base", "both sides", "conflict markers", "tradeoffs"),
+        needles=(
+            "merge base",
+            "both sides",
+            "conflict markers",
+            "tradeoffs",
+            "linear issue",
+            "avoid git rebase in favor of git merge",
+            "uncommitted",
+            "prohibited destructive",
+        ),
         errors=errors,
     )
 
@@ -135,7 +225,7 @@ def _load_json_file(path: Path, root: Path, errors: list[str]) -> object | None:
         return None
 
 
-def _validate_machine_policy(root: Path, errors: list[str]) -> None:
+def _validate_machine_conflict_policy(root: Path, errors: list[str]) -> None:
     payload = _load_json_file(root / "project-context.yaml", root, errors)
     if not isinstance(payload, dict):
         if payload is not None:
@@ -192,6 +282,112 @@ def _validate_machine_policy(root: Path, errors: list[str]) -> None:
         errors.append("machine policy must require preservation of compatible intent")
 
 
+def _validate_organization_policy(root: Path, errors: list[str]) -> None:
+    payload = _load_json_file(root / "organization-policy.json", root, errors)
+    if not isinstance(payload, dict):
+        if payload is not None:
+            errors.append("organization-policy.json must contain a JSON object")
+        return
+    if payload.get("schema_version") != 1:
+        errors.append("organization-policy.json schema_version must equal 1")
+
+    tracking = payload.get("work_tracking")
+    if not isinstance(tracking, dict):
+        errors.append("organization-policy.json lacks work_tracking")
+    else:
+        expected = {
+            "provider": "Linear",
+            "search_before_create": True,
+            "require_issue_before_implementation": True,
+            "require_pull_request_reference": True,
+            "require_status_and_validation_sync": True,
+            "on_unmapped_or_ambiguous": "stop_and_report",
+            "untracked_drive_by_changes": "forbidden",
+        }
+        for key, value in expected.items():
+            if tracking.get(key) != value:
+                errors.append(f"work_tracking.{key} must equal {value!r}")
+        categories = set(tracking.get("tracked_categories", ()))
+        missing = sorted(TRACKED_CATEGORIES - categories)
+        if missing:
+            errors.append("work_tracking.tracked_categories is missing: " + ", ".join(missing))
+
+    safe = payload.get("safe_change_policy")
+    if not isinstance(safe, dict):
+        errors.append("organization-policy.json lacks safe_change_policy")
+        return
+    expected_safe = {
+        "integration_strategy": "merge",
+        "directive": "avoid git rebase in favor of git merge",
+        "inspect_worktree_before_mutation_and_publish": True,
+        "preserve_uncommitted_and_untracked_work": True,
+        "on_unexpected_worktree_changes": "stop_and_report",
+        "force_push": "forbidden",
+        "bypass_required_checks": "forbidden",
+        "disable_security_controls": "forbidden",
+    }
+    for key, value in expected_safe.items():
+        if safe.get(key) != value:
+            errors.append(f"safe_change_policy.{key} must equal {value!r}")
+    git_commands = set(safe.get("prohibited_git_commands", ()))
+    missing_git = sorted(set(PROHIBITED_GIT_COMMANDS) - git_commands)
+    if missing_git:
+        errors.append("safe_change_policy.prohibited_git_commands is missing: " + ", ".join(missing_git))
+    filesystem_commands = set(safe.get("prohibited_filesystem_commands", ()))
+    missing_fs = sorted(set(PROHIBITED_FILESYSTEM_COMMANDS) - filesystem_commands)
+    if missing_fs:
+        errors.append("safe_change_policy.prohibited_filesystem_commands is missing: " + ", ".join(missing_fs))
+
+
+def _validate_reusable_workflow(root: Path, errors: list[str]) -> None:
+    path = root / ".github/workflows/reusable-organization-policy.yml"
+    text = _read_regular_text(path, root, errors)
+    if text is None:
+        return
+    _require_all(
+        label=".github/workflows/reusable-organization-policy.yml",
+        text=text,
+        needles=(
+            "workflow_call",
+            "contents: read",
+            "pull-requests: read",
+            "persist-credentials: false",
+            "avoid git rebase in favor of git merge",
+            "linear",
+        ),
+        errors=errors,
+    )
+    if not re.search(r"actions/checkout@[0-9a-f]{40}\b", text):
+        errors.append("reusable workflow must pin actions/checkout to a full commit SHA")
+    if re.search(r"permissions:\s*write-all", text, re.IGNORECASE):
+        errors.append("reusable workflow must not request write-all permissions")
+
+
+def _validate_community_files(root: Path, errors: list[str]) -> None:
+    for relative in COMMUNITY_FILES:
+        text = _read_regular_text(root / relative, root, errors)
+        if text is None:
+            continue
+        lowered = text.casefold()
+        if relative == Path("SECURITY.md"):
+            _require_all(
+                label=relative.as_posix(),
+                text=text,
+                needles=("do not open a public issue", "private", "linear", "credentials"),
+                errors=errors,
+            )
+        elif relative == Path("SUPPORT.md"):
+            _require_all(
+                label=relative.as_posix(),
+                text=text,
+                needles=("security.md", "credentials", "linear"),
+                errors=errors,
+            )
+        elif relative.suffix == ".yml" and relative.name != "config.yml":
+            if "required: true" not in lowered:
+                errors.append(f"{relative} must include required fields")
+
+
 def _validate_manifest(root: Path, errors: list[str]) -> None:
     payload = _load_json_file(root / "org-context-manifest.json", root, errors)
     if not isinstance(payload, dict):
@@ -225,12 +421,17 @@ def validate_repository(root: Path) -> list[str]:
             continue
         documents[relative] = text
         _validate_human_policy(relative, text, errors)
+        if relative in PRIMARY_CONTROL_FILES:
+            _validate_primary_controls(relative, text, errors)
 
     _validate_primary_agent_instructions(documents, errors)
     _validate_pull_request_template(
         documents.get(Path(".github/pull_request_template.md")), errors
     )
-    _validate_machine_policy(root, errors)
+    _validate_machine_conflict_policy(root, errors)
+    _validate_organization_policy(root, errors)
+    _validate_reusable_workflow(root, errors)
+    _validate_community_files(root, errors)
     _validate_manifest(root, errors)
     return sorted(set(errors))
 
@@ -241,11 +442,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
     errors = validate_repository(args.root)
     if errors:
-        print("semantic conflict policy validation failed:", file=sys.stderr)
+        print("organization policy validation failed:", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
-    print("semantic conflict policy validation passed")
+    print("organization policy validation passed")
     return 0
 
 
