@@ -6,6 +6,12 @@ An organization `.github/AGENTS.md` is not automatically inherited by coding age
 
 ## Required semantic conflict-resolution declaration
 
+The original organization directive is preserved verbatim:
+
+> resolve any and all git conflicts semantically, will full context, even looking back 3-10 commits in git log history for more context - never hastily pick sides in a conflict but merge things conceptually, using max context and complete conceptual awareness for a given github organization's repos and external org repos too
+
+Operationally, apply it as follows:
+
 > Resolve any and all Git conflicts semantically, with full context, including reviewing 3–10 relevant prior commits when useful. Never hastily pick sides in a conflict; merge compatible intent conceptually using maximum context and complete awareness of this GitHub organization's repositories and relevant external-organization repositories.
 
 Before finalizing any conflict resolution:
