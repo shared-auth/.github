@@ -4,6 +4,8 @@ These instructions are mandatory for human and automated contributors working in
 
 ## Semantic conflict resolution
 
+> resolve any and all git conflicts semantically, will full context, even looking back 3-10 commits in git log history for more context - never hastily pick sides in a conflict but merge things conceptually, using max context and complete conceptual awareness for a given github organization's repos and external org repos too
+
 Resolve every Git conflict semantically and with full context.
 
 Before finalizing a conflict resolution:
