@@ -1,0 +1,59 @@
+name: Bug report
+description: Report a reproducible defect without identity or secret data
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include vulnerabilities, tokens, cookies, credentials, OTP material, recovery codes, biometric data, personal data, or production data. Use synthetic identities and the private security-reporting process when appropriate.
+  - type: input
+    id: repository
+    attributes:
+      label: Affected repository
+      placeholder: shared-auth/repository
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: Version, tag, branch, or commit SHA
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem
+      description: Describe the observed behavior and impact.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps using synthetic identities
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Client, provider, tenant/test environment, runtime, deployment target, relevant configuration, and sanitized logs.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety checks
+      options:
+        - label: I removed tokens, cookies, credentials, OTP material, recovery codes, biometric data, personal data, and production data.
+          required: true
+        - label: I did not use destructive commands or invalidate live credentials/sessions to create this report.
+          required: true
