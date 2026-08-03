@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "generated_from": {
+    "repository": "ORESoftware/ai-agent-coordinator.rs",
+    "path": "config/org-project-registry.yaml",
+    "ref": "d3e03ecc2e175a7f6261523d35c73ac775c49942",
+    "ref_type": "commit",
+    "immutable": true,
+    "canonical_sha256": "ded5ed46190521e978b85dfb8a6d63d2480536b52d9b3c5bfd1bb399f94c0a9d",
+    "url": "https://github.com/ORESoftware/ai-agent-coordinator.rs/blob/d3e03ecc2e175a7f6261523d35c73ac775c49942/config/org-project-registry.yaml",
+    "raw_url": "https://raw.githubusercontent.com/ORESoftware/ai-agent-coordinator.rs/d3e03ecc2e175a7f6261523d35c73ac775c49942/config/org-project-registry.yaml"
+  },
+  "github": {
+    "login": "shared-auth",
+    "account_id": 307325286,
+    "account_type": "Organization",
+    "aliases": [
+      "github.com/shared-auth",
+      "shared-auth"
+    ]
+  },
+  "linear": {
+    "project_id": "4bbe0ba4-d7f1-49ce-8f41-afd2cff6c2a2",
+    "project_name": "github.com/shared-auth",
+    "project_url": "https://linear.app/denman/project/githubcomshared-auth-acbca07bb390",
+    "workspace_slug": "denman",
+    "team_id": "eb8ab169-5afe-4b6f-9cab-3f2aa3e887dc",
+    "team_key": "DEN"
+  },
+  "resolution": {
+    "owner_identity_key": "github_account_id",
+    "repository_override_precedence": true,
+    "on_unmapped": "reject",
+    "on_ambiguous": "reject",
+    "repository_selection": "explicit_or_runtime_allowlist"
+  },
+  "runtime_route": {
+    "slack_channel_id": "C0BMD90HED8",
+    "default_repository": "shared-auth/shared-auth-mcp-server.rs",
+    "repository_allowlist": [
+      "shared-auth/shared-auth-mcp-server.rs"
+    ],
+    "source_linear_issue": "DEN-1298"
+  },
+  "git_conflict_resolution": {
+    "mode": "semantic_conceptual_merge",
+    "directive_verbatim": "resolve any and all git conflicts semantically, will full context, even looking back 3-10 commits in git log history for more context - never hastily pick sides in a conflict but merge things conceptually, using max context and complete conceptual awareness for a given github organization's repos and external org repos too",
+    "history_lookback_commits": {
+      "minimum": 3,
+      "maximum": 10,
+      "when_available": true,
+      "inspect_both_sides": true,
+      "inspect_merge_base": true,
+      "path_scoped_history": true
+    },
+    "context_scope": [
+      "conflicted_repository",
+      "same_github_organization_repositories",
+      "relevant_external_github_organization_repositories",
+      "linear_project_context",
+      "pull_requests_issues_architecture_decisions_tests_and_docs"
+    ],
+    "forbidden_shortcuts": [
+      "wholesale_ours",
+      "wholesale_theirs",
+      "wholesale_current",
+      "wholesale_incoming",
+      "discarding_one_side_without_conceptual_analysis"
+    ],
+    "required_outcome": "preserve compatible intent, invariants, APIs, schemas, migrations, tests, documentation, security controls, and operational safeguards from every relevant side"
+  },
+  "mirrors": {
+    "github_repository": "shared-auth/.github",
+    "github_profile": "profile/README.md",
+    "github_project_context_url": "https://github.com/shared-auth/.github/blob/main/project-context.yaml",
+    "github_custom_agent": "agents/org-context.agent.md",
+    "github_integrity_workflow": ".github/workflows/org-context-integrity.yml",
+    "bundle_manifest": "org-context-manifest.json",
+    "linear_document_title": "AI Agent Context",
+    "linear_marker": "org-project-context:v1"
+  },
+  "precedence": {
+    "identity_and_routing": "central_registry",
+    "implementation_instructions": "repository_local",
+    "semantic_conflict_policy": "organization_context"
+  },
+  "public_context_only": true
+}
