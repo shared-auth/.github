@@ -1,0 +1,59 @@
+name: Semantic conflict policy
+
+on:
+  pull_request:
+    paths:
+      - AGENTS.md
+      - CONTRIBUTING.md
+      - .github/copilot-instructions.md
+      - .github/pull_request_template.md
+      - .github/workflows/semantic-conflict-policy.yml
+      - agents/org-context.agent.md
+      - org-context-manifest.json
+      - profile/README.md
+      - project-context.yaml
+      - scripts/validate_semantic_conflict_policy.py
+      - tests/test_validate_semantic_conflict_policy.py
+  push:
+    branches: [main]
+    paths:
+      - AGENTS.md
+      - CONTRIBUTING.md
+      - .github/copilot-instructions.md
+      - .github/pull_request_template.md
+      - .github/workflows/semantic-conflict-policy.yml
+      - agents/org-context.agent.md
+      - org-context-manifest.json
+      - profile/README.md
+      - project-context.yaml
+      - scripts/validate_semantic_conflict_policy.py
+      - tests/test_validate_semantic_conflict_policy.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compile dependency-free validators and tests
+        run: >-
+          python3 -m py_compile
+          scripts/validate_semantic_conflict_policy.py
+          tests/test_validate_semantic_conflict_policy.py
+
+      - name: Run policy mutation tests
+        run: python3 -m unittest discover -s tests -p 'test_validate_semantic_conflict_policy.py' -v
+
+      - name: Validate checked-in organization policy bundle
+        run: python3 scripts/validate_semantic_conflict_policy.py --root .
