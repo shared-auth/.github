@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a scoped, testable improvement
+title: "[Feature]: "
+body:
+  - type: input
+    id: repository
+    attributes:
+      label: Target repository or organization area
+      placeholder: shared-auth/repository
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: Describe the user, security, privacy, operational, or developer need before proposing a solution.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome and acceptance criteria
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Include affected contracts, repositories, clients, providers, identity/session/token flows, tenant boundaries, migrations, infrastructure, and alternatives.
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and rollout
+      description: Explain compatibility, security, privacy, tenant isolation, provider behavior, session migration, observability, and reversible rollout considerations.
+  - type: input
+    id: linear
+    attributes:
+      label: Related Linear issue or project
+      placeholder: https://linear.app/denman/...

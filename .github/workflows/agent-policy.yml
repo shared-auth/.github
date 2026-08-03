@@ -1,0 +1,42 @@
+name: Agent policy
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-agent-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out caller repository
+        uses: actions/checkout@v4
+      - name: Verify required agent-safety declarations
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f AGENTS.md ]]; then
+            echo "::error file=AGENTS.md::Missing root AGENTS.md. Mirror the organization policy from shared-auth/.github."
+            exit 1
+          fi
+
+          required=(
+            "semantic conflict"
+            "3 and up to 10"
+            "git stash"
+            "git reset"
+            "git clean"
+            "git filter-repo"
+            "destructive"
+          )
+
+          for phrase in "${required[@]}"; do
+            if ! grep -Fqi "$phrase" AGENTS.md; then
+              echo "::error file=AGENTS.md::Missing required policy phrase: $phrase"
+              exit 1
+            fi
+          done
+
+          echo "Agent policy baseline is present."

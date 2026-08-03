@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: shared-auth Linear project
+    url: https://linear.app/denman/project/githubcomshared-auth-acbca07bb390
+    about: Roadmap, cross-repository planning, and internal delivery tracking.
+  - name: Security policy
+    url: https://github.com/shared-auth/.github/security/policy
+    about: Report vulnerabilities privately; never file public security issues.
