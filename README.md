@@ -1,11 +1,12 @@
-# .github
+# shared-auth organization context
 
-Organization-wide public context, AI-agent routing metadata, and community defaults.
+This special public `.github` repository is the discoverable organization anchor for humans and AI agents.
 
-## Mandatory semantic conflict-resolution policy
+- `profile/README.md` is the visible organization profile.
+- `project-context.yaml` is the generated GitHub owner ↔ Linear project mapping.
+- `org-context-manifest.json` records deterministic SHA-256 hashes for every other managed file.
+- `agents/org-context.agent.md` is the organization-level GitHub Copilot custom-agent profile.
+- `.github/workflows/org-context-integrity.yml` verifies this mirror against its immutable central registry commit.
+- The generated profile and custom agent carry the mandatory semantic Git conflict-resolution policy.
 
-All contributors and agents must resolve every Git conflict semantically and with full context. Inspect the affected code or documentation and the relevant history—normally 3–10 prior commits via `git log`, `git show`, and `git blame` when available—before deciding. Review related repositories in this GitHub organization and relevant repositories in external organizations whenever contracts, schemas, APIs, generated code, infrastructure, or shared behavior cross repository boundaries.
-
-Never hastily choose `ours` or `theirs`, discard unfamiliar changes, or resolve only from the conflict markers. Preserve compatible intent from both sides, synthesize a conceptual merge, validate it with the relevant tests and checks, and document intentional tradeoffs.
-
-Canonical agent guidance: [`AGENTS.md`](AGENTS.md). GitHub Copilot mirror: [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
+The source of truth is the reviewed central registry named in `project-context.yaml`. Generated files should not be edited independently. Keep this repository public-safe.
