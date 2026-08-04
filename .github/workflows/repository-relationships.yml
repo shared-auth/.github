@@ -1,0 +1,59 @@
+name: Repository relationship integrity
+
+on:
+  pull_request:
+    paths:
+      - repository-relationships.json
+      - project-context.yaml
+      - .github/workflows/repository-relationships.yml
+  push:
+    branches: [main]
+    paths:
+      - repository-relationships.json
+      - project-context.yaml
+      - .github/workflows/repository-relationships.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-relationships-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      EXPECTED_OWNER: shared-auth
+      RELATIONSHIP_REGISTRY_REF: 3c9c03981c881d265bdb482248ec045a959a1fe2
+      VERIFIER_REF: db96a04ed05bbc6865c417a2313e1ec68515be71
+      VERIFIER_SHA256: 642ec1e59a02371e2fa5d9e351a84755a1c689cae5af5d92291be7f12e05a227
+    steps:
+      - name: Check out exact source head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+
+      - name: Verify immutable organization relationship mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          verifier="$(mktemp)"
+          trap 'rm -f "$verifier"' EXIT
+          curl --fail --silent --show-error --location \
+            --proto '=https' --tlsv1.2 \
+            --retry 3 --retry-all-errors \
+            --connect-timeout 10 --max-time 30 \
+            "https://raw.githubusercontent.com/ORESoftware/ai-agent-coordinator.rs/$VERIFIER_REF/scripts/verify_org_repository_relationship_mirror.py" \
+            --output "$verifier"
+          printf '%s  %s\n' "$VERIFIER_SHA256" "$verifier" | sha256sum --check --strict
+          python3 -m py_compile "$verifier"
+          python3 "$verifier" \
+            --relationships repository-relationships.json \
+            --project-context project-context.yaml \
+            --expected-owner "$EXPECTED_OWNER" \
+            --expected-registry-ref "$RELATIONSHIP_REGISTRY_REF"
