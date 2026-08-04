@@ -1,0 +1,134 @@
+{
+  "generated_from": {
+    "canonical_sha256": "ded5ed46190521e978b85dfb8a6d63d2480536b52d9b3c5bfd1bb399f94c0a9d",
+    "immutable": true,
+    "path": "config/org-project-registry.yaml",
+    "ref": "3c9c03981c881d265bdb482248ec045a959a1fe2",
+    "ref_type": "commit",
+    "repository": "ORESoftware/ai-agent-coordinator.rs",
+    "url": "https://github.com/ORESoftware/ai-agent-coordinator.rs/blob/3c9c03981c881d265bdb482248ec045a959a1fe2/config/org-project-registry.yaml"
+  },
+  "git_conflict_resolution": {
+    "context_scope": [
+      "conflicted_repository",
+      "same_github_organization_repositories",
+      "relevant_external_github_organization_repositories",
+      "linear_project_context",
+      "pull_requests_issues_architecture_decisions_tests_and_docs"
+    ],
+    "directive_verbatim": "resolve any and all git conflicts semantically, will full context, even looking back 3-10 commits in git log history for more context - never hastily pick sides in a conflict but merge things conceptually, using max context and complete conceptual awareness for a given github organization's repos and external org repos too",
+    "forbidden_shortcuts": [
+      "wholesale_ours",
+      "wholesale_theirs",
+      "wholesale_current",
+      "wholesale_incoming",
+      "discarding_one_side_without_conceptual_analysis"
+    ],
+    "history_lookback_commits": {
+      "inspect_both_sides": true,
+      "inspect_merge_base": true,
+      "maximum": 10,
+      "minimum": 3,
+      "path_scoped_history": true,
+      "when_available": true
+    },
+    "mode": "semantic_conceptual_merge"
+  },
+  "github": {
+    "account_id": 307325286,
+    "account_type": "Organization",
+    "aliases": [
+      "github.com/shared-auth",
+      "shared-auth"
+    ],
+    "login": "shared-auth"
+  },
+  "governance": {
+    "automatic_agent_instruction_inheritance": false,
+    "public_context_only": true,
+    "repository": "shared-auth/.github",
+    "repository_local_instruction_mirror_required": true,
+    "repository_scope": "shared-auth/*"
+  },
+  "linear": {
+    "project_id": "4bbe0ba4-d7f1-49ce-8f41-afd2cff6c2a2",
+    "project_name": "github.com/shared-auth",
+    "project_url": "https://linear.app/denman/project/githubcomshared-auth-acbca07bb390",
+    "team_id": "eb8ab169-5afe-4b6f-9cab-3f2aa3e887dc",
+    "team_key": "DEN",
+    "workspace_slug": "denman"
+  },
+  "relationships": [
+    {
+      "kind": "defaults_runtime_routing_to",
+      "source": {
+        "id": "shared-auth/.github",
+        "type": "github_repository"
+      },
+      "target": {
+        "id": "shared-auth/shared-auth-mcp-server.rs",
+        "type": "github_repository"
+      }
+    },
+    {
+      "kind": "generated_from",
+      "source": {
+        "id": "shared-auth/.github",
+        "type": "github_repository"
+      },
+      "target": {
+        "id": "ORESoftware/ai-agent-coordinator.rs:config/org-project-registry.yaml@3c9c03981c881d265bdb482248ec045a959a1fe2",
+        "type": "github_file"
+      }
+    },
+    {
+      "kind": "governs_public_context_for",
+      "source": {
+        "id": "shared-auth/.github",
+        "type": "github_repository"
+      },
+      "target": {
+        "account_id": 307325286,
+        "account_type": "Organization",
+        "id": "shared-auth",
+        "type": "github_owner"
+      }
+    },
+    {
+      "kind": "mirrors_linear_project",
+      "source": {
+        "id": "shared-auth/.github",
+        "type": "github_repository"
+      },
+      "target": {
+        "id": "4bbe0ba4-d7f1-49ce-8f41-afd2cff6c2a2",
+        "name": "github.com/shared-auth",
+        "type": "linear_project",
+        "url": "https://linear.app/denman/project/githubcomshared-auth-acbca07bb390"
+      }
+    },
+    {
+      "kind": "permits_runtime_routing_to",
+      "source": {
+        "id": "shared-auth/.github",
+        "type": "github_repository"
+      },
+      "target": {
+        "id": "shared-auth/shared-auth-mcp-server.rs",
+        "type": "github_repository"
+      }
+    }
+  ],
+  "repository_selection": {
+    "default_repository": "shared-auth/shared-auth-mcp-server.rs",
+    "linear_project_overrides": [],
+    "on_ambiguous": "reject",
+    "on_unmapped": "reject",
+    "policy": "explicit_or_runtime_allowlist",
+    "runtime_allowlist": [
+      "shared-auth/shared-auth-mcp-server.rs"
+    ],
+    "unregistered_dependencies": "unknown_not_assumed"
+  },
+  "schema_version": 1
+}
