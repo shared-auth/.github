@@ -21,5 +21,9 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
+      - name: Compile policy code
+        run: python3 -m py_compile scripts/validate_baseline.py tests/test_validate_baseline.py
+      - name: Run mutation tests
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Validate organization baseline
         run: python3 scripts/validate_baseline.py .
