@@ -1,0 +1,104 @@
+name: Repository relationships integrity
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/repository-relationships-integrity.yml
+      - repository-relationships.json
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/repository-relationships-integrity.yml
+      - repository-relationships.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate workflow syntax
+        uses: docker://rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          args: .github/workflows/repository-relationships-integrity.yml
+
+      - name: Verify immutable relationship declaration
+        shell: bash
+        env:
+          EXPECTED_OWNER: "shared-auth"
+          EXPECTED_ACCOUNT_ID: "307325286"
+          EXPECTED_LINEAR_PROJECT_ID: "4bbe0ba4-d7f1-49ce-8f41-afd2cff6c2a2"
+          EXPECTED_DEFAULT_REPOSITORY: "shared-auth/shared-auth-mcp-server.rs"
+          EXPECTED_FILE_SHA256: "5ccc4e70813950995aa80622c3aae1ff59dbd44a8d7dcc0abc0073382f279b2d"
+          EXPECTED_REGISTRY_SHA256: "ded5ed46190521e978b85dfb8a6d63d2480536b52d9b3c5bfd1bb399f94c0a9d"
+          REGISTRY_REF: "3c9c03981c881d265bdb482248ec045a959a1fe2"
+          REGISTRY_REPOSITORY: "ORESoftware/ai-agent-coordinator.rs"
+          EXPECTED_DIRECTIVE: "resolve any and all git conflicts semantically, will full context, even looking back 3-10 commits in git log history for more context - never hastily pick sides in a conflict but merge things conceptually, using max context and complete conceptual awareness for a given github organization's repos and external org repos too"
+        run: |
+          set -euo pipefail
+          context_tmp="$(mktemp -d)"
+          trap 'rm -rf "$context_tmp"' EXIT
+          raw_base="https://raw.githubusercontent.com/$REGISTRY_REPOSITORY/$REGISTRY_REF"
+          mkdir -p "$context_tmp/config" "$context_tmp/scripts" "$context_tmp/rendered"
+          for path in \
+            config/org-project-registry.yaml \
+            scripts/render_org_project_context.py \
+            scripts/render_org_repository_relationships.py \
+            scripts/validate_org_project_registry.py; do
+            curl --fail --silent --show-error --location \
+              --proto '=https' --tlsv1.2 \
+              --retry 3 --retry-all-errors \
+              --connect-timeout 10 --max-time 30 \
+              "$raw_base/$path" --output "$context_tmp/$path"
+          done
+          python3 -m py_compile "$context_tmp"/scripts/*.py
+          python3 "$context_tmp/scripts/render_org_repository_relationships.py" \
+            --registry "$context_tmp/config/org-project-registry.yaml" \
+            --owner "$EXPECTED_OWNER" \
+            --registry-ref "$REGISTRY_REF" \
+            --output-dir "$context_tmp/rendered"
+          cmp --silent \
+            "$context_tmp/rendered/repository-relationships.json" \
+            repository-relationships.json
+          printf '%s  %s\n' "$EXPECTED_FILE_SHA256" repository-relationships.json \
+            | sha256sum --check --strict
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          data = json.loads(Path("repository-relationships.json").read_text(encoding="utf-8"))
+          assert data["schema_version"] == 1
+          assert data["generated_from"]["immutable"] is True
+          assert data["generated_from"]["ref"] == os.environ["REGISTRY_REF"]
+          assert data["generated_from"]["canonical_sha256"] == os.environ["EXPECTED_REGISTRY_SHA256"]
+          assert data["github"]["login"] == os.environ["EXPECTED_OWNER"]
+          assert str(data["github"]["account_id"]) == os.environ["EXPECTED_ACCOUNT_ID"]
+          assert data["governance"]["repository"] == f'{os.environ["EXPECTED_OWNER"]}/.github'
+          assert data["governance"]["automatic_agent_instruction_inheritance"] is False
+          assert data["governance"]["repository_local_instruction_mirror_required"] is True
+          assert data["linear"]["project_id"] == os.environ["EXPECTED_LINEAR_PROJECT_ID"]
+          assert data["repository_selection"]["default_repository"] == os.environ["EXPECTED_DEFAULT_REPOSITORY"]
+          assert os.environ["EXPECTED_DEFAULT_REPOSITORY"] in data["repository_selection"]["runtime_allowlist"]
+          conflict = data["git_conflict_resolution"]
+          assert conflict["directive_verbatim"] == os.environ["EXPECTED_DIRECTIVE"]
+          assert conflict["history_lookback_commits"]["minimum"] == 3
+          assert conflict["history_lookback_commits"]["maximum"] == 10
+          assert conflict["history_lookback_commits"]["inspect_both_sides"] is True
+          assert conflict["history_lookback_commits"]["inspect_merge_base"] is True
+          assert conflict["history_lookback_commits"]["path_scoped_history"] is True
+          assert "relevant_external_github_organization_repositories" in conflict["context_scope"]
+          assert {"wholesale_ours", "wholesale_theirs"}.issubset(conflict["forbidden_shortcuts"])
+          assert data["repository_selection"]["unregistered_dependencies"] == "unknown_not_assumed"
+          PY
