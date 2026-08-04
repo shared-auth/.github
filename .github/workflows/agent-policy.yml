@@ -7,22 +7,49 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: agent-policy-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-agent-policy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out caller repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
       - name: Verify required agent-safety declarations
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! -f AGENTS.md ]]; then
-            echo "::error file=AGENTS.md::Missing root AGENTS.md. Mirror the organization policy from shared-auth/.github."
-            exit 1
-          fi
 
-          required=(
+          for path in agents.md AGENTS.md; do
+            if [[ ! -f "$path" ]]; then
+              echo "::error file=$path::Missing required agent policy file. Mirror the organization policy from shared-auth/.github."
+              exit 1
+            fi
+          done
+
+          lowercase_required=(
+            "avoid git rebase in favor of git merge"
+            "git stash"
+            "git reset"
+            "git clean"
+            "git filter-repo"
+            "3–10 relevant commits"
+            "Never report"
+          )
+          for phrase in "${lowercase_required[@]}"; do
+            if ! grep -Fq "$phrase" agents.md; then
+              echo "::error file=agents.md::Missing required policy phrase: $phrase"
+              exit 1
+            fi
+          done
+
+          uppercase_required=(
             "semantic conflict"
             "3 and up to 10"
             "git stash"
@@ -31,8 +58,7 @@ jobs:
             "git filter-repo"
             "destructive"
           )
-
-          for phrase in "${required[@]}"; do
+          for phrase in "${uppercase_required[@]}"; do
             if ! grep -Fqi "$phrase" AGENTS.md; then
               echo "::error file=AGENTS.md::Missing required policy phrase: $phrase"
               exit 1
