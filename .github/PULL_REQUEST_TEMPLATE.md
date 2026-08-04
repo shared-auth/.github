@@ -1,6 +1,16 @@
 ## Linear
 
-- Issue or project: <!-- Required for substantial changes -->
+- Issue or project: <!-- Required for substantial changes; include a canonical identifier such as DEN-123 -->
+
+## GitHub issue relationship
+
+- Closing relationship: <!-- Required for managed changes; for example Closes #123 or Closes owner/repository#123 -->
+
+## Delivery lane
+
+- [ ] `integration`
+- [ ] `main` / `master`
+- [ ] Other branch (explain below)
 
 ## Summary
 
@@ -14,6 +24,7 @@
 
 - [ ] Relevant tests, formatting, linting, builds, contract checks, threat-model checks, and security checks passed
 - [ ] Manual, provider, multi-client, or end-to-end validation is described below
+- [ ] The referenced GitHub issue and Linear issue are present on the organization Project
 
 Validation details:
 
