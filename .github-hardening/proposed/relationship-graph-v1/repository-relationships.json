@@ -29,7 +29,7 @@
     "contains_non_public_inventory": true,
     "digest": "sha256:13bd4f04cbc6d5c4d844c37c1ee61b239e477558937a540ae125bad1d7d11aae",
     "path": "owners/shared-auth.json",
-    "repository": "ORESoftware/project-registry"
+    "repository": "approved-private-registry"
   },
   "relationships": [],
   "repositories": [
