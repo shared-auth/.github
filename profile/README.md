@@ -46,3 +46,13 @@ The reviewed central registry is authoritative for GitHub/Linear identity and ro
 ## Public context boundary
 
 This profile and the `.github` repository are intentionally public. They may contain public identifiers, links, policies, and operating guidance. They must not contain credentials, private identity data, customer records, private issue content, incident details, security-sensitive topology, or unpublished business information.
+
+<!-- org-project-routing:start -->
+## Planning and delivery
+
+- [GitHub Project: shared-auth-project](https://github.com/orgs/shared-auth/projects/1)
+- [Linear planning project](https://linear.app/denman/project/githubcomshared-auth-acbca07bb390)
+- [Detailed project-routing contract](../docs/PROJECTS.md)
+
+GitHub owns code and delivery evidence; Linear owns planning and dependencies. The linked organization Project provides the cross-repository execution view.
+<!-- org-project-routing:end -->
