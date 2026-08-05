@@ -50,9 +50,12 @@ This profile and the `.github` repository are intentionally public. They may con
 <!-- org-project-routing:start -->
 ## Planning and delivery
 
-- [GitHub Project: shared-auth-project](https://github.com/orgs/shared-auth/projects/1)
-- [Linear planning project](https://linear.app/denman/project/githubcomshared-auth-acbca07bb390)
-- [Detailed project-routing contract](../docs/PROJECTS.md)
+- [Configured GitHub Project: shared-auth-project (project 1)](https://github.com/orgs/shared-auth/projects/1)
+- [Canonical Linear planning project](https://linear.app/denman/project/githubcomshared-auth-acbca07bb390)
+- [Project-routing summary](../docs/PROJECTS.md)
+- [Linear operating model](../docs/LINEAR.md)
+- [GitHub Projects operating model](../docs/GITHUB-PROJECTS.md)
+- [Detailed repository and program map](../PROJECTS.md)
 
-GitHub owns code and delivery evidence; Linear owns planning and dependencies. The linked organization Project provides the cross-repository execution view.
+GitHub owns code and immutable delivery evidence; Linear owns planning, dependencies, priorities, and milestones. The configured organization Project is the cross-repository execution view. Its current Projects v2 metadata must be verified by an organization owner with project access; automation must not invent a replacement board when project metadata is unavailable.
 <!-- org-project-routing:end -->
