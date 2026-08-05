@@ -1,6 +1,6 @@
 # Shared Auth project and repository map
 
-This document is the canonical routing guide for planning and delivery across the `shared-auth` GitHub organization.
+This document is the canonical routing guide for planning and delivery across the `shared-auth` GitHub organization. The detailed Linear and Projects-v2 operating rules live in [`docs/LINEAR.md`](docs/LINEAR.md) and [`docs/GITHUB-PROJECTS.md`](docs/GITHUB-PROJECTS.md).
 
 ## Canonical systems
 
@@ -9,10 +9,10 @@ This document is the canonical routing guide for planning and delivery across th
 | Linear | priority, dependencies, ownership, milestones, planning history, cross-project relationships | [`github.com/shared-auth`](https://linear.app/denman/project/githubcomshared-auth-acbca07bb390) |
 | GitHub repositories | source, commits, branches, pull requests, review, CI, releases, deployment evidence | [`github.com/shared-auth`](https://github.com/shared-auth) |
 | GitHub issues | repository-scoped implementation and evidence tracker | issue in the owning repository |
-| GitHub Project | organization-wide delivery view; never a replacement for repository or Linear history | proposed **Shared Auth Delivery** project |
+| GitHub Project | configured organization-wide execution view; never a replacement for repository or Linear history | [`shared-auth-project`, project 1](https://github.com/orgs/shared-auth/projects/1) |
 | Organization `.github` | repository boundaries, project routing, contribution and security policy | this repository |
 
-Linear and GitHub are linked ledgers, not competing sources of truth. Linear owns planning state. GitHub owns code and immutable delivery evidence.
+Linear and GitHub are linked ledgers, not competing sources of truth. Linear owns planning state. GitHub owns code and immutable delivery evidence. The connected GitHub App cannot verify Projects-v2 metadata, so the configured project number and URL are treated as a reviewed routing target rather than proof of current fields, views, items, or accessibility.
 
 ## Current architecture program
 
@@ -62,9 +62,9 @@ Shared Auth is a platform dependency for many product organizations. Work remain
 
 Each organization keeps its canonical Linear project and GitHub repository history. Cross-org work is related through IDs/links; it is not copied into one giant duplicate issue tree.
 
-## Proposed GitHub Project: Shared Auth Delivery
+## GitHub Project: `shared-auth-project` (project 1)
 
-The organization-level Projects-v2 board should be named **Shared Auth Delivery**.
+The configured organization-level Projects-v2 execution target is [`shared-auth-project`, project 1](https://github.com/orgs/shared-auth/projects/1). An organization owner with Projects-v2 access must verify its current title, accessibility, fields, views, and items against the following contract. If the link is missing or inaccessible to intended members, repair or create project 1 rather than silently introducing an unreviewed replacement number.
 
 ### Fields
 
@@ -99,11 +99,13 @@ The organization-level Projects-v2 board should be named **Shared Auth Delivery*
 - per-product migration items created under DEN-2197;
 - merged documentation PRs `shared-auth-infra#7`, `shared-auth-server.rs#36`, and the `.github` project-map PR as evidence rather than standalone implementation completion.
 
-### Board status
+### Project access and automation status
 
-The board specification is published here. The connected GitHub integration used for this change can create repository branches, commits, issues, and pull requests, but it does not expose GitHub Projects-v2 mutation. The `.github` repository also has Issues disabled, so the board-creation action cannot be tracked as a local `.github` issue.
+The board contract and configured URL are published here and in [`docs/GITHUB-PROJECTS.md`](docs/GITHUB-PROJECTS.md). The connected GitHub integration used for repository changes does not expose Projects-v2 read or mutation, so no claim is made that the live board currently matches this schema.
 
-Create/populate the board through an organization-admin GitHub Projects workflow, then add its URL to this document and [`ORG_CONTEXT.md`](ORG_CONTEXT.md). Until that happens, Linear and repository issues remain the operative planning surfaces; this document prevents field/view/ownership drift.
+Projects automation must run through an organization-admin GitHub App, workflow, or token with explicit Projects-v2 scope. Credentials must remain in approved secret storage and must never be committed, logged, attached to issues or pull requests, or embedded in artifacts. Automation must resolve project 1 exactly and fail closed on ambiguous or missing mappings; it must not silently create duplicate boards.
+
+Until project metadata is verified, Linear and repository issues remain the authoritative planning and implementation surfaces. Project verification or repair should be recorded in a reviewed GitHub pull request and a Linear issue or project update.
 
 ## Linkage rules
 
@@ -142,7 +144,7 @@ Before creating a repository:
 3. define runtime, contract, SDK, infra, E2E, and deployment boundaries;
 4. decide whether the repository is an application, library/package, interface, client, test, infrastructure, website, bridge, or inventory repo;
 5. add the repository to this ownership map;
-6. add the relevant GitHub Project item/fields once the board exists;
+6. add the relevant GitHub Project item/fields once project access is verified;
 7. create initial issues with acceptance evidence rather than placeholder work;
 8. preserve `*-infra` outside application monorepo/submodule trees.
 
