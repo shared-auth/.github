@@ -4,6 +4,7 @@ This public `.github` repository is the canonical home for shared-auth organizat
 
 - GitHub organization: https://github.com/shared-auth
 - Linear project: https://linear.app/denman/project/githubcomshared-auth-acbca07bb390
+- Project and repository map: [`PROJECTS.md`](PROJECTS.md)
 - Organization profile source: [`profile/README.md`](profile/README.md)
 - Canonical agent policy: [`AGENTS.md`](AGENTS.md)
 - Copilot mirror: [`.github/copilot-instructions.md`](.github/copilot-instructions.md)
