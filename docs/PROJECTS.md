@@ -22,6 +22,9 @@ Documentation branches must be reviewed through pull requests and merged after c
 - **Dependency plan:** [MEMEBANK_ANALYSIS_AUTHORIZATION.md](./MEMEBANK_ANALYSIS_AUTHORIZATION.md)
 - **MemeBank Linear issue:** [DEN-1535](https://linear.app/denman/issue/DEN-1535/implement-no-plaintext-disk-analysis-streams-and-client-vault-fail)
 - **MemeBank execution issue:** [mbk-ocr-api#23](https://github.com/memebank/mbk-ocr-api/issues/23)
+- **Shared-auth interface issue:** [shared-auth-interfaces#16](https://github.com/shared-auth/shared-auth-interfaces/issues/16)
+- **Shared-auth server issue:** [shared-auth-server.rs#39](https://github.com/shared-auth/shared-auth-server.rs/issues/39)
+- **Cross-org E2E issue:** [shared-auth-e2e#13](https://github.com/shared-auth/shared-auth-e2e/issues/13)
 - **Merged exact-version provider:** [mbk-ocr-api#21](https://github.com/memebank/mbk-ocr-api/pull/21)
 - **Shared-auth durable Project card:** [.github#16](https://github.com/shared-auth/.github/issues/16)
 
