@@ -17,9 +17,13 @@
       ".github/copilot-instructions.md",
       ".github/ISSUE_TEMPLATE/bug_report.yml",
       ".github/ISSUE_TEMPLATE/feature_request.yml",
-      ".github/ISSUE_TEMPLATE/config.yml"
+      ".github/ISSUE_TEMPLATE/config.yml",
+      "PROJECTS.md",
+      "docs/PROJECTS.md",
+      "docs/LINEAR.md",
+      "docs/GITHUB-PROJECTS.md"
     ],
-    "reason": "Preserve the newer Shared Auth safeguards for credentials, sessions, OTP material, identity data, tenant boundaries, and non-destructive change control instead of overwriting them with an older generated mirror.",
+    "reason": "Preserve the newer Shared Auth safeguards for credentials, sessions, OTP material, identity data, tenant boundaries, non-destructive change control, and reviewed planning/delivery routing instead of overwriting them with an older generated mirror.",
     "local_integrity_workflow": ".github/workflows/baseline-policy.yml"
   },
   "github": {
@@ -38,6 +42,16 @@
     "workspace_slug": "denman",
     "team_id": "eb8ab169-5afe-4b6f-9cab-3f2aa3e887dc",
     "team_key": "DEN"
+  },
+  "github_project": {
+    "configured_project_number": 1,
+    "configured_project_name": "shared-auth-project",
+    "configured_project_url": "https://github.com/orgs/shared-auth/projects/1",
+    "purpose": "cross_repository_execution_view",
+    "metadata_verification": "requires_organization_projects_v2_access",
+    "connected_app_verification_state": "not_readable_by_current_github_app",
+    "on_missing_or_ambiguous": "fail_closed_and_require_owner_reconciliation",
+    "operating_contract": "docs/GITHUB-PROJECTS.md"
   },
   "resolution": {
     "owner_identity_key": "github_account_id",
@@ -86,6 +100,8 @@
     "github_profile": "profile/README.md",
     "public_context": "ORG_CONTEXT.md",
     "github_project_context_url": "https://github.com/shared-auth/.github/blob/main/project-context.yaml",
+    "github_projects_operating_model": "docs/GITHUB-PROJECTS.md",
+    "linear_operating_model": "docs/LINEAR.md",
     "github_custom_agent": "agents/org-context.agent.md",
     "github_policy_workflow": ".github/workflows/baseline-policy.yml",
     "repository_baseline": "policies/REPOSITORY_BASELINE.md",
