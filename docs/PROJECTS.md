@@ -14,3 +14,15 @@ GitHub is authoritative for repositories, commits, pull requests, reviews, CI ch
 
 Documentation branches must be reviewed through pull requests and merged after checks pass. Concurrent edits are reconciled semantically against the latest default branch: this managed routing block is regenerated while all unrelated prose outside the block is preserved. Do not resolve conflicts by blindly choosing one side.
 <!-- org-project-routing:end -->
+
+## Active cross-organization dependency
+
+### MemeBank asynchronous-analysis authorization
+
+- **Dependency plan:** [MEMEBANK_ANALYSIS_AUTHORIZATION.md](./MEMEBANK_ANALYSIS_AUTHORIZATION.md)
+- **MemeBank Linear issue:** [DEN-1535](https://linear.app/denman/issue/DEN-1535/implement-no-plaintext-disk-analysis-streams-and-client-vault-fail)
+- **MemeBank execution issue:** [mbk-ocr-api#23](https://github.com/memebank/mbk-ocr-api/issues/23)
+- **Merged exact-version provider:** [mbk-ocr-api#21](https://github.com/memebank/mbk-ocr-api/pull/21)
+- **Shared-auth durable Project card:** [.github#16](https://github.com/shared-auth/.github/issues/16)
+
+Shared-auth must provide short-lived workload identity and stable allow/deny/unavailable decision semantics before MemeBank performs any object-store or KMS access. Completion requires interfaces, server enforcement, client support, durable MemeBank state comparison, revocation behavior, cross-tenant E2E, audit redaction, and production activation—not documentation alone.
