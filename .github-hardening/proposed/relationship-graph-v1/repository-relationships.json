@@ -1,0 +1,56 @@
+{
+  "$schema": "./repository-relationships.schema.json",
+  "audience": "public",
+  "generated": {
+    "complete_for_visibility": "public",
+    "generated_at": "2026-08-05T21:07:32Z",
+    "generator_version": "2026-08-04.1",
+    "inventory_digest": "sha256:4f21bfc60e81946505045ecab0fded46c4a6dd84a752baa8f814396e50c12673",
+    "managed_by": "ore-repository-relationship-rollout",
+    "omitted_repository_count": 11,
+    "private_repositories_omitted": true,
+    "source": "GitHub GraphQL repository inventory plus reviewed manual declarations"
+  },
+  "owner": {
+    "account_type": "organization",
+    "dotgithub_repository": "shared-auth/.github",
+    "github_id": "307325286",
+    "linear_project": {
+      "id": "4bbe0ba4-d7f1-49ce-8f41-afd2cff6c2a2",
+      "name": "github.com/shared-auth",
+      "team_id": "eb8ab169-5afe-4b6f-9cab-3f2aa3e887dc",
+      "url": "https://linear.app/denman/project/githubcomshared-auth-acbca07bb390",
+      "workspace": "denman"
+    },
+    "login": "shared-auth",
+    "mapping_id": "context:shared-auth"
+  },
+  "private_registry": {
+    "contains_non_public_inventory": true,
+    "digest": "sha256:13bd4f04cbc6d5c4d844c37c1ee61b239e477558937a540ae125bad1d7d11aae",
+    "path": "owners/shared-auth.json",
+    "repository": "ORESoftware/project-registry"
+  },
+  "relationships": [],
+  "repositories": [
+    {
+      "archived": false,
+      "default_branch": "main",
+      "fork": false,
+      "full_name": "shared-auth/.github",
+      "github_id": "1320444668",
+      "name": ".github",
+      "owner": "shared-auth",
+      "roles": [
+        "community-health",
+        "governance",
+        "relationship-registry"
+      ],
+      "source": "github-graphql-api",
+      "url": "https://github.com/shared-auth/.github",
+      "visibility": "public"
+    }
+  ],
+  "schema_version": 1,
+  "unresolved_hints": []
+}
