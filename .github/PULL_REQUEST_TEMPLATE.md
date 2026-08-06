@@ -1,47 +1,39 @@
-## Linear
-
-- Issue or project: <!-- Required for substantial changes; include a canonical identifier such as DEN-123 -->
-
-## GitHub issue relationship
-
-- Closing relationship: <!-- Required for managed changes; for example Closes #123 or Closes owner/repository#123 -->
-
-## Delivery lane
-
-- [ ] `integration`
-- [ ] `main` / `master`
-- [ ] Other branch (explain below)
-
+<!-- ore-org-baseline:begin -->
 ## Summary
 
-<!-- What changed, and why? -->
+Describe the behavior and intent, not only the files changed.
 
-## Architecture, security, and compatibility
+## Planning and dependencies
 
-<!-- Repositories, APIs, schemas, identity/session/token contracts, providers, generated artifacts, migrations, infrastructure, tenant boundaries, supported clients, or external dependencies affected. -->
+- Linear project or issue: [github.com/shared-auth](https://linear.app/denman/project/githubcomshared-auth-acbca07bb390)
+- Related GitHub issues or pull requests:
+- Related repositories or external contracts:
+
+## Risk, security, migration, and rollback
+
+- User or operational impact:
+- Security/privacy impact and secret-handling review:
+- Migration or compatibility considerations:
+- Rollback or recovery approach:
 
 ## Validation
 
-- [ ] Relevant tests, formatting, linting, builds, contract checks, threat-model checks, and security checks passed
-- [ ] Manual, provider, multi-client, or end-to-end validation is described below
-- [ ] The referenced GitHub issue and Linear issue are present on the organization Project
-
-Validation details:
+List exact commands, environments, and results. Include unit, integration, contract, build, and end-to-end evidence as applicable.
 
 ## Conflict-resolution record
 
-- [ ] No conflicts occurred, or every conflict was resolved semantically
-- [ ] Both sides and surrounding code/docs/tests/contracts were reviewed
-- [ ] 3–10 relevant prior commits were inspected when useful
-- [ ] Related repositories in this and relevant external organizations were reviewed when behavior crossed boundaries
-- [ ] Compatible intent was preserved; no wholesale `ours`/`theirs` selection was used
+- [ ] Remote state was fetched before editing and before pushing.
+- [ ] Concurrent work was preserved; no destructive operation or history rewrite was used.
+- [ ] Conflicts, if any, were resolved semantically using the merge base, both sides, 3–10 relevant commits, tests, contracts, linked work, and related repositories.
+- [ ] The complete worktree was scanned for unresolved conflict markers.
+- [ ] No `ours`/`theirs` side was accepted wholesale without conceptual review.
 
-## Non-destructive and security checks
+## Final checklist
 
-- [ ] No `git stash`, `git reset`, `git clean`, `git filter-repo`, force push, destructive history rewrite, recursive delete, destructive data/infra operation, credential/session invalidation, or policy bypass was used
-- [ ] Unrelated work was left untouched and only intended paths were staged
-- [ ] No tokens, cookies, credentials, OTP material, recovery codes, biometric data, secrets, personal data, or production data are included
-
-## Risks and rollout
-
-<!-- Operational risk, auth/session impact, tenant isolation, provider compatibility, migration/rollback strategy, monitoring, and follow-up work. Prefer reversible roll-forward changes. -->
+- [ ] Focused commits and reviewable diff
+- [ ] Documentation and generated artifacts updated from authoritative sources
+- [ ] External Actions pinned to full commit SHAs
+- [ ] Explicit least-privilege workflow permissions and timeouts
+- [ ] No credentials, private data, or sensitive logs included
+- [ ] Authoritative remote branch/PR/check evidence verified
+<!-- ore-org-baseline:end -->
