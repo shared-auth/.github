@@ -1,0 +1,92 @@
+name: Reusable organization policy
+
+on:
+  workflow_call:
+    inputs:
+      require_linear_reference:
+        description: Require a Linear issue reference in pull-request bodies
+        required: false
+        type: boolean
+        default: true
+  workflow_dispatch:
+    inputs:
+      require_linear_reference:
+        description: Require a Linear issue reference when a pull-request payload is present
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate repository policy and pull-request tracking
+        shell: bash
+        env:
+          PR_BODY: ${{ github.event.pull_request.body || '' }}
+          PR_NUMBER: ${{ github.event.pull_request.number || '' }}
+          REQUIRE_LINEAR_REFERENCE: ${{ inputs.require_linear_reference }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+          import re
+          import sys
+
+          errors: list[str] = []
+          required_files = (
+              Path("AGENTS.md"),
+              Path(".github/copilot-instructions.md"),
+          )
+          required_phrases = (
+              "avoid git rebase in favor of git merge",
+              "git stash",
+              "git reset",
+              "git clean",
+              "git filter-repo",
+              "uncommitted",
+              "linear",
+              "before implementation",
+              "semantic",
+              "full context",
+              "conceptual merge",
+          )
+          for path in required_files:
+              if not path.is_file() or path.is_symlink():
+                  errors.append(f"missing regular policy file: {path}")
+                  continue
+              text = path.read_text(encoding="utf-8").casefold()
+              for phrase in required_phrases:
+                  if phrase.casefold() not in text:
+                      errors.append(f"{path} is missing required policy language: {phrase}")
+
+          require_linear = os.environ.get("REQUIRE_LINEAR_REFERENCE", "true").casefold() == "true"
+          body = os.environ.get("PR_BODY", "")
+          pull_request_number = os.environ.get("PR_NUMBER", "")
+          if require_linear and pull_request_number and not re.search(
+              r"(?:https://linear\.app/[^\s)]+|\b[A-Z][A-Z0-9]{1,15}-[1-9][0-9]*\b)",
+              body,
+          ):
+              errors.append("pull-request body is missing a Linear issue identifier or URL")
+
+          if errors:
+              print("organization policy validation failed:", file=sys.stderr)
+              for error in errors:
+                  print(f"- {error}", file=sys.stderr)
+              raise SystemExit(1)
+          print("organization policy validation passed")
+          PY
