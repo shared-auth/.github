@@ -18,7 +18,7 @@ This page is the public orientation point for people and authorized AI agents. R
 1. Read [`project-context.yaml`](https://github.com/shared-auth/.github/blob/main/project-context.yaml) for the canonical GitHub owner, Linear project, and reviewed runtime route.
 2. Read [`repository-relationships.json`](https://github.com/shared-auth/.github/blob/main/repository-relationships.json) before inferring dependencies, ownership, or repository selection.
 3. Read the organization [`AGENTS.md`](https://github.com/shared-auth/.github/blob/main/AGENTS.md), [`ORG_CONTEXT.md`](https://github.com/shared-auth/.github/blob/main/ORG_CONTEXT.md), and every applicable repository-local `AGENTS.md`, `agents.md`, Copilot instruction, and path-specific instruction.
-4. For reviewed routed work, the default repository is `shared-auth/shared-auth-mcp-server.rs`, and it is the only repository in that runtime allowlist. Exact repository overrides take precedence. Ambiguous or unmapped work must stop rather than be guessed.
+Private repository details are intentionally withheld from this public document.
 5. Never expose credentials, passwords, private keys, access or refresh tokens, session identifiers, OTP seeds or codes, biometric material, tenant data, customer information, incident details, or private topology in public outputs.
 
 ## Canonical identity and authority
@@ -67,3 +67,15 @@ GitHub owns code and delivery evidence; Linear owns planning and dependencies. T
 
 Repositories in this organization use semantic conflict resolution with 3–10 relevant prior commits when useful, full cross-repository context, pull-request delivery, and a hard automated-agent denylist for destructive or history-rewriting operations.
 <!-- ore-org-baseline:end -->
+
+<!-- BEGIN MANAGED REPOSITORY RELATIONSHIPS v1 -->
+## Repository relationship registry
+
+`shared-auth` declares repository roles, dependency edges, cross-organization capabilities, deployment ownership, and the git-submodule/Zed-package contract:
+
+- [Human-readable map](architecture/REPOSITORY_RELATIONSHIPS.md)
+- [Machine-readable manifest](architecture/repository-relationships.json)
+- [JSON Schema](architecture/repository-relationships.schema.json)
+
+The public registry withholds private repository names and edges.
+<!-- END MANAGED REPOSITORY RELATIONSHIPS v1 -->
