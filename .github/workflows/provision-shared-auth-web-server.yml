@@ -1,0 +1,312 @@
+name: provision shared-auth-web-server.js
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type CREATE shared-auth/shared-auth-web-server.js
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: provision-shared-auth-web-server-js
+  cancel-in-progress: false
+
+env:
+  MANIFEST: repository-provisioning/shared-auth-web-server.json
+  TARGET_REPOSITORY: shared-auth/shared-auth-web-server.js
+  SOURCE_REPOSITORY: shared-auth/shared-auth-monorepo
+  SOURCE_SHA: 67a3b5138a4050a23a409094ef094b050bb162fd
+  SOURCE_TREE: 107af718f7e488331dad5da467a7058c532f19b9
+  SEED_TREE: f514d68fa5ad28a8b99fe65873482ae5f6fee84e
+  SEED_PATH: repository-seeds/shared-auth-web-server.js
+  ARCHIVE_SHA256: 095c5e0c464aae73b85f399614c0ad11be1acfb67fd2a40a4da4ee1da83cc848
+  BOOTSTRAP_BRANCH: agent/bootstrap-shared-auth-web-server-67a3b51
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+
+jobs:
+  provision:
+    if: github.repository == 'shared-auth/.github' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment: repository-provisioning
+    steps:
+      - name: Require exact human confirmation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test '${{ inputs.confirmation }}' = 'CREATE shared-auth/shared-auth-web-server.js'
+
+      - name: Check out organization policy repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - name: Validate fixed provisioning manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e --arg source_sha "$SOURCE_SHA" --arg source_tree "$SOURCE_TREE" --arg seed_tree "$SEED_TREE" --arg archive "$ARCHIVE_SHA256" '
+            .schema == "shared-auth/repository-provisioning/v1" and
+            .owner == "shared-auth" and
+            .name == "shared-auth-web-server.js" and
+            .full_name == "shared-auth/shared-auth-web-server.js" and
+            .visibility == "private" and
+            .default_branch == "main" and
+            .bootstrap_branch == "agent/bootstrap-shared-auth-web-server-67a3b51" and
+            .source.repository == "shared-auth/shared-auth-monorepo" and
+            .source.commit == $source_sha and
+            .source.commit_tree == $source_tree and
+            .source.seed_tree == $seed_tree and
+            .source.archive_sha256 == $archive and
+            .source.file_count == 38 and
+            .required_environment == "repository-provisioning" and
+            .required_secret == "SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN" and
+            .controls.branch_protection.allow_force_pushes == false and
+            .controls.branch_protection.allow_deletions == false
+          ' "$MANIFEST" >/dev/null
+
+      - name: Require protected organization repository-admin credential
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          echo "::add-mask::$GH_TOKEN"
+          gh api user --jq .login >/dev/null
+
+      - name: Create or verify exact private repository
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh api "repos/$TARGET_REPOSITORY" >/tmp/repository.json 2>/dev/null; then
+            jq -e '.full_name == "shared-auth/shared-auth-web-server.js" and .private == true and .archived == false' /tmp/repository.json >/dev/null
+          else
+            jq -n --slurpfile manifest "$MANIFEST" '{
+              name: $manifest[0].name,
+              description: $manifest[0].description,
+              private: true,
+              auto_init: true,
+              has_issues: true,
+              has_projects: true,
+              has_wiki: false,
+              has_discussions: false,
+              is_template: false
+            }' >/tmp/create-repository.json
+            gh api --method POST orgs/shared-auth/repos --input /tmp/create-repository.json >/tmp/repository.json
+            jq -e '.full_name == "shared-auth/shared-auth-web-server.js" and .private == true and .default_branch == "main"' /tmp/repository.json >/dev/null
+          fi
+
+      - name: Configure merge and repository policy
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -n --slurpfile manifest "$MANIFEST" '{
+            description: $manifest[0].description,
+            private: true,
+            has_issues: true,
+            has_projects: true,
+            has_wiki: false,
+            delete_branch_on_merge: true,
+            allow_squash_merge: true,
+            allow_merge_commit: false,
+            allow_rebase_merge: false,
+            allow_auto_merge: false
+          }' >/tmp/repository-settings.json
+          gh api --method PATCH "repos/$TARGET_REPOSITORY" --input /tmp/repository-settings.json >/dev/null
+
+          jq -n '{
+            required_status_checks: null,
+            enforce_admins: true,
+            required_pull_request_reviews: {
+              dismissal_restrictions: {},
+              dismiss_stale_reviews: true,
+              require_code_owner_reviews: true,
+              required_approving_review_count: 1,
+              require_last_push_approval: true,
+              bypass_pull_request_allowances: {}
+            },
+            restrictions: null,
+            required_linear_history: true,
+            allow_force_pushes: false,
+            allow_deletions: false,
+            block_creations: false,
+            required_conversation_resolution: true,
+            lock_branch: false,
+            allow_fork_syncing: false
+          }' >/tmp/branch-protection.json
+          gh api --method PUT "repos/$TARGET_REPOSITORY/branches/main/protection" --input /tmp/branch-protection.json >/dev/null
+
+          jq -r '.topics[]' "$MANIFEST" | jq -R -s 'split("\n") | map(select(length > 0)) | {names:.}' >/tmp/topics.json
+          gh api --method PUT -H 'Accept: application/vnd.github+json' "repos/$TARGET_REPOSITORY/topics" --input /tmp/topics.json >/dev/null
+
+      - name: Check out exact private seed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: shared-auth/shared-auth-monorepo
+          ref: ${{ env.SOURCE_SHA }}
+          path: source-repository
+          token: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+          fetch-depth: 1
+          persist-credentials: false
+          show-progress: false
+          submodules: false
+
+      - name: Prove immutable seed and materialize
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C source-repository rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git -C source-repository rev-parse HEAD^{tree})" = "$SOURCE_TREE"
+          test "$(git -C source-repository rev-parse HEAD:"$SEED_PATH")" = "$SEED_TREE"
+          test -z "$(git -C source-repository config --local --get-all http.https://github.com/.extraheader || true)"
+          python3 source-repository/$SEED_PATH/materialize.py materialized
+          test "$(jq -r .archive_sha256 source-repository/$SEED_PATH/seed-manifest.json)" = "$ARCHIVE_SHA256"
+          test "$(find materialized -type f | wc -l | tr -d ' ')" = "38"
+          (cd materialized && python3 scripts/check.py)
+
+      - name: Generate deterministic Node lock and vendored htmx
+        working-directory: materialized
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run vendor
+          test -s package-lock.json
+          test -s static/vendor/htmx.min.js
+
+      - name: Install stable Rust verification surface
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4
+        with:
+          components: rustfmt,clippy
+
+      - name: Generate Rust lock and validate all targets and features
+        working-directory: materialized
+        env:
+          TEST_FLEET_READ_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+          GIT_TERMINAL_PROMPT: "0"
+        shell: bash
+        run: |
+          set -euo pipefail
+          askpass="$RUNNER_TEMP/shared-auth-provision-askpass"
+          cat >"$askpass" <<'SH'
+          #!/usr/bin/env sh
+          case "$1" in
+            *Username*) printf '%s\n' 'x-access-token' ;;
+            *Password*) printf '%s\n' "$TEST_FLEET_READ_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          SH
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass"
+          trap 'rm -f "$askpass"' EXIT
+
+          cargo generate-lockfile
+          cargo metadata --locked --format-version 1 --no-deps >/dev/null
+          cargo fmt --all -- --check
+          cargo clippy --locked --all-targets --all-features -- -D warnings
+          cargo test --locked --all-targets --all-features
+          cargo build --locked --release --all-features
+
+      - name: Enforce secret and biometric custody boundaries
+        working-directory: materialized
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RInE --exclude='*.md' --exclude='.env.example' '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{30,}|lin_api_[A-Za-z0-9]{20,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|Authorization:[[:space:]]*Bearer[[:space:]]+[A-Za-z0-9._~-]{12,})' .
+          ! grep -RInE '(raw_(face|fingerprint)|biometric_template|face_template|fingerprint_template)' src migrations config
+          test "$(find env/dec -type f ! -name README.md | wc -l | tr -d ' ')" = "0"
+
+      - name: Check out target repository main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: shared-auth/shared-auth-web-server.js
+          ref: main
+          path: target-repository
+          token: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+          fetch-depth: 1
+          persist-credentials: false
+          show-progress: false
+
+      - name: Commit and push bootstrap branch without force
+        env:
+          TEST_FLEET_READ_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+          GIT_TERMINAL_PROMPT: "0"
+        shell: bash
+        run: |
+          set -euo pipefail
+          askpass="$RUNNER_TEMP/shared-auth-push-askpass"
+          cat >"$askpass" <<'SH'
+          #!/usr/bin/env sh
+          case "$1" in
+            *Username*) printf '%s\n' 'x-access-token' ;;
+            *Password*) printf '%s\n' "$TEST_FLEET_READ_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          SH
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass"
+          trap 'rm -f "$askpass"' EXIT
+
+          git -C target-repository remote set-url origin "https://github.com/$TARGET_REPOSITORY.git"
+          if git -C target-repository ls-remote --exit-code origin "refs/heads/$BOOTSTRAP_BRANCH" >/dev/null 2>&1; then
+            echo "bootstrap branch already exists; refusing to overwrite it" >&2
+            exit 1
+          fi
+          git -C target-repository switch -c "$BOOTSTRAP_BRANCH"
+          find target-repository -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a materialized/. target-repository/
+          git -C target-repository config user.name 'shared-auth-provisioner'
+          git -C target-repository config user.email 'shared-auth-provisioner@users.noreply.github.com'
+          git -C target-repository add -A
+          git -C target-repository commit -m 'feat: bootstrap Shared Auth organization dashboard server'
+          git -C target-repository push --set-upstream origin "$BOOTSTRAP_BRANCH"
+
+      - name: Open draft bootstrap pull request
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/bootstrap-pr.md <<'EOF'
+          ## Summary
+
+          Bootstraps the Rust Shared Auth organization dashboard server from the exact, independently tracked repository seed.
+
+          ### Source identity
+
+          - staging repository: `shared-auth/shared-auth-monorepo`
+          - staging PR: `#9`
+          - source commit: `67a3b5138a4050a23a409094ef094b050bb162fd`
+          - source tree: `107af718f7e488331dad5da467a7058c532f19b9`
+          - seed tree: `f514d68fa5ad28a8b99fe65873482ae5f6fee84e`
+          - seed archive SHA-256: `095c5e0c464aae73b85f399614c0ad11be1acfb67fd2a40a4da4ee1da83cc848`
+
+          ### Included
+
+          Axum, Maud, htmx, SeaORM, Supabase/Postgres, optional Leptos and Dioxus boundaries, organization-scoped users/sessions/roles views, truthful JWT/WebAuthn/SSH/Kerberos/OpenPGP/biometric capability states, `ores.otel.log` via Zed package management, SOPS/Just/Nix secret workflows, migrations, container and Kubernetes hardening, and CI.
+
+          ### Provisioning-time gates
+
+          Repository policy and syntax checks, deterministic npm and Cargo locks, local htmx vendoring, Rustfmt, Clippy with warnings denied, all-target/all-feature tests, all-feature release build, credential scanning, and raw-biometric-custody rejection all passed before this branch was pushed.
+
+          The PR remains draft until `shared-auth-test` exact-head evidence is attached, real SOPS recipients and runtime secrets are provisioned outside Git, the disposable Supabase/Postgres ceremony passes, and the `ORESoftware/k8s-cluster` deployment/browser checks are green.
+          EOF
+
+          existing="$(gh pr list --repo "$TARGET_REPOSITORY" --head "$BOOTSTRAP_BRANCH" --base main --state open --json url --jq '.[0].url // empty')"
+          if test -n "$existing"; then
+            pr_url="$existing"
+          else
+            pr_url="$(gh pr create --repo "$TARGET_REPOSITORY" --head "$BOOTSTRAP_BRANCH" --base main --draft --title 'feat: bootstrap Shared Auth organization dashboard server' --body-file /tmp/bootstrap-pr.md)"
+          fi
+          printf '### Provisioning result\n\n- Repository: `%s`\n- Branch: `%s`\n- Pull request: %s\n' "$TARGET_REPOSITORY" "$BOOTSTRAP_BRANCH" "$pr_url" >> "$GITHUB_STEP_SUMMARY"
