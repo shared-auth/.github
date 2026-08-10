@@ -1,10 +1,10 @@
 {
   "files": {
     ".github/workflows/org-context-integrity.yml": "fb3af098ad3c4f38dcba5cc6dc1e925659fb467a4578d4a3c53af6bcdf00019c",
-    "README.md": "17c368ff45553eadfb8acc7ba26940321cf12025e4810919eb10d477345e7efc",
+    "README.md": "a50d272a0572b9b3e7df6ad4ab1753eef7a3726a40d03758796151b48aca72d8",
     "agents/org-context.agent.md": "26b2ebd9f017be20f4fd7c445257291a8fb7e266228aa7209eab923d66e6159c",
-    "profile/README.md": "1d8e8535ba29155e189a21fbad2954d881fe831ad872d7c790c52aad03d1eae0",
-    "project-context.yaml": "4de904fd711ab2aa24fe9dd4ad1b5ad1fff5fd841bb53d3aef485fdaef88112b"
+    "profile/README.md": "b04566939fa744d3589f97ac9034270e5c861ce24b2edb892571eb99124729bc",
+    "project-context.yaml": "9c20cb0fadc7e96562a5dc9ee996b1ee91dca32ecb2ae91169dd5565326df4fd"
   },
   "github_account_id": 307325286,
   "github_owner": "shared-auth",

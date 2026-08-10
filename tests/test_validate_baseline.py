@@ -90,7 +90,10 @@ class BaselineValidatorTests(unittest.TestCase):
             ]
         )
         write(self.root, "agents.md", agents)
-        write(self.root, "AGENTS.md", VALIDATOR.MANDATORY_DIRECTIVE + "\n")
+        # Keep the compatibility mirror valid even when the temporary directory
+        # lives on a case-insensitive filesystem where AGENTS.md and agents.md
+        # resolve to the same inode.
+        write(self.root, "AGENTS.md", agents)
         for relative in VALIDATOR.POINTER_FILES:
             write(self.root, relative, "Read canonical agents.md before changing files.\n")
         write(

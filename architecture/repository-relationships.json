@@ -1,0 +1,70 @@
+{
+  "$schema": "./repository-relationships.schema.json",
+  "composition_policy": {
+    "dual_managed_invariant": "gitlink SHA must equal the source commit in the Zed lock entry",
+    "editable_source_composition": "git-submodules",
+    "package_and_artifact_resolution": "zed-pkg",
+    "production_deployment_resolution": "immutable OCI image digest or signed artifact",
+    "production_source_checkout": "forbidden as a runtime deployment mechanism"
+  },
+  "inventory_scope": "public-repositories-plus-role-contracts",
+  "observability_policy": {
+    "logs": "structured output with trace_id/span_id correlation",
+    "metrics": "Prometheus-compatible bounded-cardinality metrics",
+    "required_resource_attributes": [
+      "service.name",
+      "service.namespace",
+      "service.version",
+      "deployment.environment",
+      "vcs.ref.head.revision"
+    ],
+    "traces": "OpenTelemetry with W3C trace context"
+  },
+  "organization": "shared-auth",
+  "privacy": {
+    "private_repository_count": 11,
+    "private_repository_names_published": false,
+    "public_repository_names_published": true,
+    "reason": "The public .github registry intentionally withholds private repository names and edges."
+  },
+  "registry_repository": "shared-auth/.github",
+  "relationships": [
+    {
+      "from": "organization://shared-auth",
+      "kind": "integrates_with",
+      "rationale": "optional second/third-factor verification",
+      "source_basis": "explicit-product-decision",
+      "status": "declared",
+      "to": "organization://3FA-app"
+    }
+  ],
+  "repositories": [
+    {
+      "archived": false,
+      "default_branch": "main",
+      "fork": false,
+      "full_name": "shared-auth/.github",
+      "lifecycle": "active",
+      "name": ".github",
+      "role": "organization_governance",
+      "visibility": "public"
+    }
+  ],
+  "role_contracts": {
+    "api_service": "Owns public APIs, webhooks, authorization, validation, and orchestration.",
+    "client_sdk": "Depends on interfaces and exposes generated clients plus thin wrappers.",
+    "composition_workspace": "Composes source repositories and records the release BOM.",
+    "end_to_end_tests": "Runs black-box compatibility and user-flow checks.",
+    "infrastructure": "Owns product cloud resources; promotion remains GitOps-controlled.",
+    "interfaces": "Own OpenAPI, events, JSON Schema, compatibility fixtures, and DTO inputs.",
+    "mcp_server": "Calls product SDKs/APIs; no parallel domain persistence.",
+    "sync_service": "Owns product conflict policy/adapters and wraps Opto reconciliation.",
+    "web_bff": "Owns browser sessions, CSRF, HTML/SSR, and calls the product API."
+  },
+  "schema_version": "1.0.0",
+  "service_boundary_policy": {
+    "cross_service_database_access": "forbidden-by-default",
+    "mcp_database_access": "forbidden-by-default; MCP calls the product API/SDK",
+    "preferred_cross_service_calls": "typed API/SDK, event, or owned replicated read model"
+  }
+}
