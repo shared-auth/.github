@@ -13,6 +13,9 @@ grep -Fq 'path_regex: ^env/enc/dev\.env\.enc$' .sops.yaml || fail "missing dev r
 grep -Fq 'path_regex: ^env/enc/prod\.env\.enc$' .sops.yaml || fail "missing prod rule"
 python3 scripts/verify-sops-release-policy.py .sops.yaml prod
 while IFS= read -r -d '' p; do case "$p" in env/enc/dev.env.enc|env/enc/prod.env.enc) ;; env/enc/*) fail "unexpected encrypted path $p" ;; .env|*.env|.env.*|*.env.*|env/dec/*) case "$p" in .env.example|*/.env.example) ;; *) fail "tracked plaintext $p" ;; esac ;; esac; done < <(git ls-files -z)
-if git grep -I -q -e 'AGE-SE''CRET-KEY-1' -e '-----BEGIN PRIVATE KEY-----' -e '-----BEGIN OPENSSH PRIVATE KEY-----' -- .; then fail "private-key material detected"; fi
+age_private='AGE-SE''CRET-KEY-1'
+pem_private='-----BEGIN ''PRIVATE KEY-----'
+openssh_private='-----BEGIN OPENSSH ''PRIVATE KEY-----'
+if git grep -I -q -e "$age_private" -e "$pem_private" -e "$openssh_private" -- .; then fail "private-key material detected"; fi
 for forbidden in DATABASE_URL SENDGRID_API_KEY TWILIO_AUTH_TOKEN SERVICE_ROLE SIGNING_KEY BEARER_TOKEN ACCESS_TOKEN CLIENT_SECRET AWS_SECRET_ACCESS_KEY CLOUDFLARE_API_TOKEN; do ! grep -Eq "^[A-Z0-9_]*${forbidden}[A-Z0-9_]*=" .env.example || fail "credential variable forbidden in governance schema: $forbidden"; done
 echo "organization environment policy is valid"
