@@ -1,0 +1,414 @@
+name: provision shared-auth-web-server.js
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type CREATE shared-auth/shared-auth-web-server.js
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: provision-shared-auth-web-server-js
+  cancel-in-progress: false
+
+env:
+  MANIFEST: repository-provisioning/shared-auth-web-server.json
+  TARGET_REPOSITORY: shared-auth/shared-auth-web-server.js
+  SOURCE_REPOSITORY: shared-auth/shared-auth-monorepo
+  SOURCE_SHA: 38d2091538e96ce7178188f270085f01e8b8f14e
+  SOURCE_TREE: 65a9ba0b7d726c52ba15afcc7530a63063422fd7
+  SEED_TREE: 7f7bb75276add6f79be9369885d96c856c381cfd
+  SEED_PATH: repository-seeds/shared-auth-web-server.js
+  BASE_ARCHIVE_SHA256: 095c5e0c464aae73b85f399614c0ad11be1acfb67fd2a40a4da4ee1da83cc848
+  MATERIALIZED_TREE_SHA256: 155a87af95af62029c2a759e83b667494679874595351c4973216f745ed2dd71
+  REBUILT_ARCHIVE_SHA256: 0f852bb098da1012c18c4a77dde75e81eb09a16fee89917516a30bba3d95c2de
+  LOGGER_REPOSITORY: ores-otel/ores.otel.log
+  LOGGER_SHA: 62e5edba75c34310dea40652cc792fcb7d148c9c
+  LOGGER_TREE: 24a5b9435c7fad36615774071841004e20d4b3e7
+  LOGGER_RUST_TREE: 75de2857ccda3cc997e8fc323e4ffba428a5750f
+  BOOTSTRAP_BRANCH: agent/bootstrap-shared-auth-web-server-38d2091
+  DATABASE_URL: postgres://shared_auth:shared_auth_test@127.0.0.1:5432/shared_auth_test
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+
+jobs:
+  provision:
+    if: github.repository == 'shared-auth/.github' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: repository-provisioning
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_DB: shared_auth_test
+          POSTGRES_USER: shared_auth
+          POSTGRES_PASSWORD: shared_auth_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U shared_auth -d shared_auth_test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - name: Require exact human confirmation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test '${{ inputs.confirmation }}' = 'CREATE shared-auth/shared-auth-web-server.js'
+
+      - name: Check out organization policy repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          show-progress: false
+
+      - name: Validate fixed provisioning manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e \
+            --arg source_sha "$SOURCE_SHA" \
+            --arg source_tree "$SOURCE_TREE" \
+            --arg seed_tree "$SEED_TREE" \
+            --arg base_archive "$BASE_ARCHIVE_SHA256" \
+            --arg materialized_tree "$MATERIALIZED_TREE_SHA256" \
+            --arg rebuilt_archive "$REBUILT_ARCHIVE_SHA256" \
+            --arg logger_sha "$LOGGER_SHA" \
+            --arg logger_tree "$LOGGER_TREE" \
+            --arg logger_rust_tree "$LOGGER_RUST_TREE" '
+            .schema == "shared-auth/repository-provisioning/v2" and
+            .owner == "shared-auth" and
+            .name == "shared-auth-web-server.js" and
+            .full_name == "shared-auth/shared-auth-web-server.js" and
+            .visibility == "private" and
+            .default_branch == "main" and
+            .bootstrap_branch == "agent/bootstrap-shared-auth-web-server-38d2091" and
+            .source.repository == "shared-auth/shared-auth-monorepo" and
+            .source.commit == $source_sha and
+            .source.commit_tree == $source_tree and
+            .source.seed_tree == $seed_tree and
+            .source.base_archive_sha256 == $base_archive and
+            .source.materialized_tree_sha256 == $materialized_tree and
+            .source.equivalent_rebuilt_archive_sha256 == $rebuilt_archive and
+            .source.file_count == 38 and
+            .controls.auto_init == false and
+            .dependencies["ores-otel/ores.otel.log"].commit == $logger_sha and
+            .dependencies["ores-otel/ores.otel.log"].commit_tree == $logger_tree and
+            .dependencies["ores-otel/ores.otel.log"].rust_tree == $logger_rust_tree and
+            .certification.repository == "shared-auth-test/server-api-contract-e2e" and
+            .certification.pull_request == 25 and
+            .required_environment == "repository-provisioning" and
+            .required_secret == "SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN" and
+            .controls.branch_protection.allow_force_pushes == false and
+            .controls.branch_protection.allow_deletions == false
+          ' "$MANIFEST" >/dev/null
+
+      - name: Require protected organization repository-admin credential
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          echo "::add-mask::$GH_TOKEN"
+          gh api user --jq .login >/dev/null
+
+      - name: Check out exact private seed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: shared-auth/shared-auth-monorepo
+          ref: ${{ env.SOURCE_SHA }}
+          path: source-repository
+          token: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+          fetch-depth: 1
+          persist-credentials: false
+          show-progress: false
+          submodules: false
+
+      - name: Prove immutable seed and materialize patch overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C source-repository rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git -C source-repository rev-parse HEAD^{tree})" = "$SOURCE_TREE"
+          test "$(git -C source-repository rev-parse HEAD:"$SEED_PATH")" = "$SEED_TREE"
+          test -z "$(git -C source-repository config --local --get-all http.https://github.com/.extraheader || true)"
+          python3 source-repository/$SEED_PATH/materialize.py materialized
+          test "$(find materialized -type f | wc -l | tr -d ' ')" = "38"
+          test "$(jq -r .archive_sha256 source-repository/$SEED_PATH/seed-manifest.json)" = "$BASE_ARCHIVE_SHA256"
+          test "$(jq -r .materialized_tree_sha256 source-repository/$SEED_PATH/seed-patches.json)" = "$MATERIALIZED_TREE_SHA256"
+          test "$(jq -r .validation.equivalent_rebuilt_archive_sha256 source-repository/$SEED_PATH/seed-patches.json)" = "$REBUILT_ARCHIVE_SHA256"
+          (cd materialized && python3 scripts/check.py)
+
+      - name: Prove vanilla PostgreSQL and Supabase-role migrations
+        working-directory: materialized
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0001_directory.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0001_directory.sql
+          count="$(psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -Atc "select count(*) from information_schema.tables where table_schema = 'public' and table_name like 'directory_%';")"
+          test "$count" -ge 1
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE ROLE anon NOLOGIN; CREATE ROLE authenticated NOLOGIN;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0001_directory.sql
+          privileges="$(psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -Atc "select count(*) from information_schema.role_table_grants where grantee in ('anon','authenticated') and table_schema = 'public' and table_name like 'directory_%';")"
+          test "$privileges" = "0"
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+
+      - name: Generate deterministic Node lock and vendored htmx
+        working-directory: materialized
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          test -s package-lock.json
+          lock_before="$(sha256sum package-lock.json)"
+          npm ci --ignore-scripts --no-audit --no-fund
+          test "$lock_before" = "$(sha256sum package-lock.json)"
+          npm run vendor
+          test -s static/vendor/htmx.min.js
+
+      - name: Check out exact public ores.otel.log source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: ores-otel/ores.otel.log
+          ref: ${{ env.LOGGER_SHA }}
+          path: logger-source
+          fetch-depth: 1
+          persist-credentials: false
+          show-progress: false
+          submodules: false
+
+      - name: Verify and link exact logger Zed dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git -C logger-source rev-parse HEAD)" = "$LOGGER_SHA"
+          test "$(git -C logger-source rev-parse HEAD^{tree})" = "$LOGGER_TREE"
+          test "$(git -C logger-source rev-parse HEAD:sdk/rust)" = "$LOGGER_RUST_TREE"
+          test -z "$(git -C logger-source config --local --get-all http.https://github.com/.extraheader || true)"
+          mkdir -p materialized/.deps/ores-otel-log
+          cp -a logger-source/sdk/rust/. materialized/.deps/ores-otel-log/
+          python3 - <<'PY'
+          import pathlib
+          import tomllib
+
+          manifest = tomllib.loads(
+              pathlib.Path("materialized/.deps/ores-otel-log/Cargo.toml").read_text(encoding="utf-8")
+          )
+          assert manifest["package"]["name"] == "oresoftware-next-loggers"
+          PY
+
+      - name: Install stable Rust verification surface
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4
+        with:
+          components: rustfmt,clippy
+
+      - name: Generate Rust lock and validate all targets and features
+        working-directory: materialized
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo generate-lockfile
+          test -s Cargo.lock
+          cargo metadata --locked --format-version 1 --no-deps >/dev/null
+          cargo fmt --all -- --check
+          cargo clippy --locked --all-targets --all-features -- -D warnings
+          cargo test --locked --all-targets --all-features
+          cargo build --locked --release --all-features
+
+      - name: Enforce secret and biometric custody boundaries
+        working-directory: materialized
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -RInE \
+            --exclude='*.md' \
+            --exclude='.env.example' \
+            --exclude-dir=.git \
+            --exclude-dir=target \
+            --exclude-dir=node_modules \
+            '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{30,}|lin_api_[A-Za-z0-9]{20,}|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|Authorization:[[:space:]]*Bearer[[:space:]]+[A-Za-z0-9._~-]{12,})' .
+          ! grep -RInE '(raw_(face|fingerprint)|biometric_template|face_template|fingerprint_template)' src migrations config
+          test "$(find env/dec -type f ! -name README.md | wc -l | tr -d ' ')" = "0"
+
+      - name: Create or verify exact private repository
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh api "repos/$TARGET_REPOSITORY" >/tmp/repository.json 2>/dev/null; then
+            jq -e '.full_name == "shared-auth/shared-auth-web-server.js" and .private == true and .archived == false' /tmp/repository.json >/dev/null
+          else
+            jq -n --slurpfile manifest "$MANIFEST" '{
+              name: $manifest[0].name,
+              description: $manifest[0].description,
+              private: true,
+              auto_init: false,
+              has_issues: true,
+              has_projects: true,
+              has_wiki: false,
+              has_discussions: false,
+              is_template: false
+            }' >/tmp/create-repository.json
+            gh api --method POST orgs/shared-auth/repos --input /tmp/create-repository.json >/tmp/repository.json
+            jq -e '.full_name == "shared-auth/shared-auth-web-server.js" and .private == true' /tmp/repository.json >/dev/null
+          fi
+
+      - name: Initialize an empty main branch when needed
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! gh api "repos/$TARGET_REPOSITORY/git/ref/heads/main" >/dev/null 2>&1; then
+            jq -n '{tree: []}' >/tmp/empty-tree.json
+            empty_tree="$(gh api --method POST "repos/$TARGET_REPOSITORY/git/trees" --input /tmp/empty-tree.json --jq .sha)"
+            jq -n --arg tree "$empty_tree" '{message:"chore: initialize protected default branch", tree:$tree, parents:[]}' >/tmp/initial-commit.json
+            initial_commit="$(gh api --method POST "repos/$TARGET_REPOSITORY/git/commits" --input /tmp/initial-commit.json --jq .sha)"
+            jq -n --arg sha "$initial_commit" '{ref:"refs/heads/main", sha:$sha}' >/tmp/main-ref.json
+            gh api --method POST "repos/$TARGET_REPOSITORY/git/refs" --input /tmp/main-ref.json >/dev/null
+          fi
+          jq -n '{default_branch:"main"}' >/tmp/default-branch.json
+          gh api --method PATCH "repos/$TARGET_REPOSITORY" --input /tmp/default-branch.json >/dev/null
+
+      - name: Configure merge and repository policy
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -n --slurpfile manifest "$MANIFEST" '{
+            description: $manifest[0].description,
+            private: true,
+            has_issues: true,
+            has_projects: true,
+            has_wiki: false,
+            delete_branch_on_merge: true,
+            allow_squash_merge: true,
+            allow_merge_commit: false,
+            allow_rebase_merge: false,
+            allow_auto_merge: false
+          }' >/tmp/repository-settings.json
+          gh api --method PATCH "repos/$TARGET_REPOSITORY" --input /tmp/repository-settings.json >/dev/null
+
+          jq -n '{
+            required_status_checks: null,
+            enforce_admins: true,
+            required_pull_request_reviews: {
+              dismissal_restrictions: {},
+              dismiss_stale_reviews: true,
+              require_code_owner_reviews: true,
+              required_approving_review_count: 1,
+              require_last_push_approval: true,
+              bypass_pull_request_allowances: {}
+            },
+            restrictions: null,
+            required_linear_history: true,
+            allow_force_pushes: false,
+            allow_deletions: false,
+            block_creations: false,
+            required_conversation_resolution: true,
+            lock_branch: false,
+            allow_fork_syncing: false
+          }' >/tmp/branch-protection.json
+          gh api --method PUT "repos/$TARGET_REPOSITORY/branches/main/protection" --input /tmp/branch-protection.json >/dev/null
+
+          jq -r '.topics[]' "$MANIFEST" | jq -R -s 'split("\n") | map(select(length > 0)) | {names:.}' >/tmp/topics.json
+          gh api --method PUT -H 'Accept: application/vnd.github+json' "repos/$TARGET_REPOSITORY/topics" --input /tmp/topics.json >/dev/null
+
+      - name: Check out target repository main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: shared-auth/shared-auth-web-server.js
+          ref: main
+          path: target-repository
+          token: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+          fetch-depth: 1
+          persist-credentials: false
+          show-progress: false
+
+      - name: Commit and push bootstrap branch without force
+        env:
+          TEST_FLEET_READ_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+          GIT_TERMINAL_PROMPT: "0"
+        shell: bash
+        run: |
+          set -euo pipefail
+          askpass="$RUNNER_TEMP/shared-auth-push-askpass"
+          cat >"$askpass" <<'SH'
+          #!/usr/bin/env sh
+          case "$1" in
+            *Username*) printf '%s\n' 'x-access-token' ;;
+            *Password*) printf '%s\n' "$TEST_FLEET_READ_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          SH
+          chmod 700 "$askpass"
+          export GIT_ASKPASS="$askpass"
+
+          git -C target-repository remote set-url origin "https://github.com/$TARGET_REPOSITORY.git"
+          if git -C target-repository ls-remote --exit-code origin "refs/heads/$BOOTSTRAP_BRANCH" >/dev/null 2>&1; then
+            echo "bootstrap branch already exists; refusing to overwrite it" >&2
+            exit 1
+          fi
+          git -C target-repository switch -c "$BOOTSTRAP_BRANCH"
+          cp -a materialized/. target-repository/
+          git -C target-repository config user.name 'shared-auth-provisioner'
+          git -C target-repository config user.email 'shared-auth-provisioner@users.noreply.github.com'
+          git -C target-repository add -A
+          git -C target-repository diff --cached --check
+          git -C target-repository commit -m 'feat: bootstrap Shared Auth organization dashboard server'
+          git -C target-repository push --set-upstream origin "$BOOTSTRAP_BRANCH"
+
+      - name: Open draft bootstrap pull request
+        env:
+          GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/bootstrap-pr.md <<'EOF'
+          ## Summary
+
+          Bootstraps the Rust Shared Auth organization dashboard server from the exact, independently certified repository seed.
+
+          ### Source identity
+
+          - staging repository: `shared-auth/shared-auth-monorepo`
+          - staging PR: `#9`
+          - source commit: `38d2091538e96ce7178188f270085f01e8b8f14e`
+          - source tree: `65a9ba0b7d726c52ba15afcc7530a63063422fd7`
+          - seed tree: `7f7bb75276add6f79be9369885d96c856c381cfd`
+          - base archive SHA-256: `095c5e0c464aae73b85f399614c0ad11be1acfb67fd2a40a4da4ee1da83cc848`
+          - materialized tree SHA-256: `155a87af95af62029c2a759e83b667494679874595351c4973216f745ed2dd71`
+          - exact logger commit: `ores-otel/ores.otel.log@62e5edba75c34310dea40652cc792fcb7d148c9c`
+          - certification PR: `shared-auth-test/server-api-contract-e2e#25`
+
+          ### Included
+
+          Axum, Maud, htmx, SeaORM, Supabase/Postgres, optional Leptos and Dioxus boundaries, organization-scoped users/sessions/roles views, truthful JWT/WebAuthn/SSH/Kerberos/OpenPGP/biometric capability states, `ores.otel.log` through the Zed dependency boundary, SOPS/Just/Nix secret workflows, migrations, container and Kubernetes hardening, and CI.
+
+          ### Provisioning-time gates
+
+          Repository policy and syntax checks, three PostgreSQL migration ceremonies, deterministic npm and Cargo locks, local htmx vendoring, Rustfmt, Clippy with warnings denied, all-target/all-feature tests, all-feature release build, credential scanning, and raw-biometric-custody rejection passed before this branch was pushed.
+
+          The PR remains draft until real SOPS recipients and runtime secrets are provisioned outside Git, the deployment is promoted through `ORESoftware/k8s-cluster`, and live browser/API organization-isolation checks are green.
+          EOF
+
+          existing="$(gh pr list --repo "$TARGET_REPOSITORY" --head "$BOOTSTRAP_BRANCH" --base main --state open --json url --jq '.[0].url // empty')"
+          if test -n "$existing"; then
+            pr_url="$existing"
+          else
+            pr_url="$(gh pr create --repo "$TARGET_REPOSITORY" --head "$BOOTSTRAP_BRANCH" --base main --draft --title 'feat: bootstrap Shared Auth organization dashboard server' --body-file /tmp/bootstrap-pr.md)"
+          fi
+          printf '### Provisioning result\n\n- Repository: `%s`\n- Branch: `%s`\n- Pull request: %s\n' "$TARGET_REPOSITORY" "$BOOTSTRAP_BRANCH" "$pr_url" >> "$GITHUB_STEP_SUMMARY"
