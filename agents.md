@@ -19,7 +19,6 @@ Lowercase `agents.md` is canonical. Read every applicable lowercase `agents.md` 
 Inspect the current branch, complete working tree, remotes, default branch, open pull requests, linked GitHub issues, linked Linear work, repository documentation, tests, schemas, generated artifacts, deployment definitions, and relevant related repositories. Preserve every unfamiliar or uncommitted change.
 
 Use read-only inspection and non-pruning synchronization such as `git status --short --branch`, `git remote -v`, `git fetch --all`, `git diff`, `git log`, `git show`, and `git blame`. Never treat a dirty worktree or inconvenient branch as permission to discard state.
-
 **avoid git rebase in favor of git merge.**
 
 ## Work tracking
@@ -63,7 +62,6 @@ Do not use destructive commands merely to make tests pass, clear a conflict, sim
 ### Required safe alternatives
 
 Use additive branches, separate clean worktrees or clones, explicit path staging, ordinary commits, non-force pushes, patch-based edits, read-only queries, dry runs, backups, additive migrations, and reversible roll-forward changes. Leave unrelated work untouched. When safe progress is impossible, preserve all state and report the exact blocker.
-
 ## Source ownership and cross-repository context
 
 Edit authoritative sources rather than generated mirrors, vendored copies, caches, or downstream consumers. Identify generators and regenerate derived artifacts from reviewed sources. Never detach, absorb, relocate, remove, or rewrite a submodule or worktree. Cross-repository behavior must be understood across the owning organization and relevant external organizations before contracts are changed.
@@ -74,7 +72,7 @@ Never print, log, commit, paste into issues, include in fixtures, or expose toke
 
 ## Pull requests, validation, and evidence
 
-Use focused branches and pull requests. Link the relevant Linear issue or project. Explain behavior, risks, migration and roll-forward considerations, security impact, tests run, conflicts and their semantic resolution, and cross-repository dependencies. Never report completion without authoritative evidence; a branch, commit, pull request, merge, deployment, test run, or external update requires authoritative remote evidence.
+Use focused branches and pull requests. Link the relevant Linear issue or project. Explain behavior, risks, migration and roll-forward considerations, security impact, tests run, conflicts and their semantic resolution, and cross-repository dependencies. Never report completion without authoritative evidence; do not describe a branch, commit, pull request, merge, deployment, test run, or external update as complete until authoritative remote evidence confirms it.
 <!-- ore-org-baseline:end -->
 
 <!-- ore-primary-branch-policy:begin -->
