@@ -4,7 +4,13 @@
 
 Resolve every Git conflict semantically and with full context. Read both sides plus surrounding code, documentation, tests, schemas, generated artifacts, identity/session contracts, and provider integrations. When relevant and available, inspect 3–10 prior commits using `git log`, `git show`, and `git blame`. Review related repositories in this organization and relevant external organizations when behavior crosses repository boundaries. Never hastily accept `ours` or `theirs`; preserve compatible intent and produce a conceptual merge.
 
+For integration history, avoid git rebase in favor of git merge.
+
+Every discovered feature, fix, enhancement, bug, vulnerability, reliability concern, documentation gap, or technical-debt item must have a Linear issue in the canonical project before implementation starts. Search before creating an issue, and stop rather than guess when routing is missing or ambiguous.
+
 Operate non-destructively. Do not use `git stash`, `git reset`, `git clean`, `git filter-repo`, `git filter-branch`, history-rewriting rebase or amend operations, destructive checkout/restore, force pushes, ref deletion, pruning, recursive deletion, destructive database or infrastructure commands, credential/session invalidation, package unpublishing, or any equivalent action that discards, hides, rewrites, purges, or deletes state. Do not bypass hooks, tests, reviews, branch protections, or security checks.
+
+Preserve uncommitted and untracked work. Prohibited commands include `git rebase`, `git checkout --`, `git restore`, `git branch -D`, `git reflog expire`, `git gc --prune`, `git push --force`, `git push -f`, `rm`, `mv`, `sed`, `find -delete`, `xargs rm`, `truncate`, `shred`, and `dd`. Stop and report unexpected changes or ambiguous ownership.
 
 Leave unrelated work untouched. Prefer inspection, additive branches, separate clean worktrees or clones, explicit staging, normal non-force pushes, dry runs, backups, additive migrations, and reversible roll-forward changes. If safe progress is blocked, preserve state and report the blocker.
 

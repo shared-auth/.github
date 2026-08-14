@@ -18,7 +18,7 @@ This page is the public orientation point for people and authorized AI agents. R
 1. Read [`project-context.yaml`](https://github.com/shared-auth/.github/blob/main/project-context.yaml) for the canonical GitHub owner, Linear project, and reviewed runtime route.
 2. Read [`repository-relationships.json`](https://github.com/shared-auth/.github/blob/main/repository-relationships.json) before inferring dependencies, ownership, or repository selection.
 3. Read the organization [`AGENTS.md`](https://github.com/shared-auth/.github/blob/main/AGENTS.md), [`ORG_CONTEXT.md`](https://github.com/shared-auth/.github/blob/main/ORG_CONTEXT.md), and every applicable repository-local `AGENTS.md`, `agents.md`, Copilot instruction, and path-specific instruction.
-Private repository details are intentionally withheld from this public document.
+4. Use the reviewed central registry for routing. Exact repository overrides take precedence; ambiguous or unmapped work must stop rather than be guessed. Private repository details are intentionally withheld from this public document.
 5. Never expose credentials, passwords, private keys, access or refresh tokens, session identifiers, OTP seeds or codes, biometric material, tenant data, customer information, incident details, or private topology in public outputs.
 
 ## Canonical identity and authority
@@ -29,6 +29,8 @@ Private repository details are intentionally withheld from this public document.
 - Immutable Linear project ID: `4bbe0ba4-d7f1-49ce-8f41-afd2cff6c2a2`
 - Linear team: `DEN` (`eb8ab169-5afe-4b6f-9cab-3f2aa3e887dc`)
 - Organization defaults and public policies: [`shared-auth/.github`](https://github.com/shared-auth/.github)
+- Machine-readable context: [`project-context.yaml`](https://github.com/shared-auth/.github/blob/main/project-context.yaml)
+- Reviewed central registry: [`ORESoftware/ai-agent-coordinator.rs`](https://github.com/ORESoftware/ai-agent-coordinator.rs/blob/d3e03ecc2e175a7f6261523d35c73ac775c49942/config/org-project-registry.yaml)
 
 The reviewed central registry is authoritative for GitHub/Linear identity and routing. Repository-local instructions are authoritative for builds, tests, architecture, migrations, and implementation. Missing or contradictory context must be reported and resolved; it must not be invented.
 
@@ -40,7 +42,7 @@ The reviewed central registry is authoritative for GitHub/Linear identity and ro
 - Preserve identity and session state non-destructively. Do not use history rewrites, blanket resets, destructive cleanup, or wholesale side selection to make a change appear simple.
 - Keep application code and infrastructure repositories separate. An `*-infra` repository does not belong under a monorepo `apps/` directory as a Git submodule.
 - Link substantial work to Linear and a GitHub issue or pull request so humans and agents can recover intent.
-- Resolve Git conflicts semantically: inspect the merge base, both sides, path-scoped history, and 3–10 relevant commits when available; read linked issues, pull requests, tests, schemas, migrations, architecture decisions, and relevant same-organization or external repositories. Never accept `ours`, `theirs`, current, or incoming wholesale without conceptual review.
+- Resolve Git conflicts semantically and with full context: inspect the merge base, both sides, path-scoped history, and 3–10 relevant commits when available; read linked issues, pull requests, tests, schemas, migrations, architecture decisions, and relevant same-organization or external repositories. Never accept `ours`, `theirs`, current, or incoming wholesale; produce a conceptual merge.
 - Preserve compatible intent, APIs, schemas, tests, documentation, security controls, and operational safeguards from every relevant side, then scan the complete worktree for unresolved conflict markers and run all affected validation.
 
 ## Public context boundary

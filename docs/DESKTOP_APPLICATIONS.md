@@ -121,8 +121,8 @@ The Flutter repository must reciprocally name `shared-auth-desktop.rs`, implemen
 
 - GitHub Project: [`shared-auth-project` — Project 1](https://github.com/orgs/shared-auth/projects/1)
 - Linear project: `github.com/shared-auth`
-- Central registry: [`ORESoftware/project-registry`](https://github.com/ORESoftware/project-registry/blob/main/registry/desktop-applications.json)
-- Central strategy: [`rust-desktop-strategies.md`](https://github.com/ORESoftware/project-registry/blob/main/docs/rust-desktop-strategies.md)
+- Central registry: `approved-private-registry` — the private locator is intentionally opaque in this public repository.
+- Central strategy: maintained in the approved private registry; no private repository URL is published here.
 - Portfolio rollout: [`DEN-2469`](https://linear.app/denman/issue/DEN-2469/roll-out-paired-rust-flutter-desktop-repositories-across-the-portfolio)
 
-Repository creation, toolkit changes, OAuth/OIDC changes, deep-link changes, transfers, archival, or platform-status changes must update this document, Linear, the central registry/strategy, and both companion repositories together.
+Repository creation, toolkit changes, OAuth/OIDC changes, deep-link changes, transfers, archival, or platform-status changes must update this document, Linear, the approved private registry/strategy, and both companion repositories together.

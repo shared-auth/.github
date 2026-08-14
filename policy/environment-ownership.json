@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "ciphertext_paths": ["env/enc/dev.env.enc", "env/enc/prod.env.enc"],
+  "plaintext_root": "env/dec",
+  "production_source_of_truth": "protected deployment secret store",
+  "communications": {
+    "authentication": "shared-auth/shared-auth-server.rs",
+    "general": "fanwaave/push-notification-server.rs"
+  },
+  "repositories": {
+    "shared-auth-server.rs": "auth-provider-runtime",
+    "shared-auth-web-server.js": "runtime",
+    "shared-auth-nats-bridge.rs": "internal-event-runtime",
+    "shared-auth-sync": "identity-sync-runtime",
+    "shared-auth-infra": "deployment-owner",
+    "shared-auth-e2e": "disposable-test-owner",
+    "shared-auth-mcp-server.rs": "no-secrets",
+    "shared-auth-lib": "no-secrets",
+    "shared-auth-interfaces": "no-secrets",
+    "shared-auth-clients": "no-secrets",
+    "shared-auth-monorepo": "references-only",
+    "shared-auth.github.io": "no-secrets",
+    ".github": "no-secrets"
+  }
+}

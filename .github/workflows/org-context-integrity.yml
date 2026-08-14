@@ -1,0 +1,72 @@
+name: Organization context integrity
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/org-context-integrity.yml
+      - README.md
+      - agents/org-context.agent.md
+      - org-context-manifest.json
+      - profile/README.md
+      - project-context.yaml
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/org-context-integrity.yml
+      - README.md
+      - agents/org-context.agent.md
+      - org-context-manifest.json
+      - profile/README.md
+      - project-context.yaml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate workflow syntax
+        uses: docker://rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          args: .github/workflows/org-context-integrity.yml
+
+      - name: Verify immutable central source and generated bundle
+        shell: bash
+        env:
+          EXPECTED_OWNER: "shared-auth"
+          REGISTRY_REF: "d3e03ecc2e175a7f6261523d35c73ac775c49942"
+          REGISTRY_REPOSITORY: "ORESoftware/ai-agent-coordinator.rs"
+        run: |
+          set -euo pipefail
+          context_tmp="$(mktemp -d)"
+          trap 'rm -rf "$context_tmp"' EXIT
+          raw_base="https://raw.githubusercontent.com/$REGISTRY_REPOSITORY/$REGISTRY_REF"
+          mkdir -p "$context_tmp/config" "$context_tmp/scripts"
+          for path in \
+            config/org-project-registry.yaml \
+            scripts/render_org_project_context.py \
+            scripts/validate_org_project_registry.py \
+            scripts/verify_org_project_context.py; do
+            curl --fail --silent --show-error --location \
+              --proto '=https' --tlsv1.2 \
+              --retry 3 --retry-all-errors \
+              --connect-timeout 10 --max-time 30 \
+              "$raw_base/$path" --output "$context_tmp/$path"
+          done
+          python3 -m py_compile "$context_tmp"/scripts/*.py
+          python3 "$context_tmp/scripts/verify_org_project_context.py" \
+            --registry "$context_tmp/config/org-project-registry.yaml" \
+            --bundle-dir . \
+            --owner "$EXPECTED_OWNER" \
+            --registry-ref "$REGISTRY_REF"

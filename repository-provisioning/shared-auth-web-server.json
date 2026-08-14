@@ -1,0 +1,71 @@
+{
+  "schema": "shared-auth/repository-provisioning/v2",
+  "owner": "shared-auth",
+  "name": "shared-auth-web-server.js",
+  "full_name": "shared-auth/shared-auth-web-server.js",
+  "visibility": "private",
+  "description": "Organization-scoped Shared Auth users, sessions, roles, and capability dashboard implemented in Rust with Axum, Maud, htmx, SeaORM, Supabase, Leptos and Dioxus integration boundaries.",
+  "default_branch": "main",
+  "bootstrap_branch": "agent/bootstrap-shared-auth-web-server-38d2091",
+  "topics": [
+    "shared-auth",
+    "rust",
+    "axum",
+    "maud",
+    "htmx",
+    "seaorm",
+    "supabase",
+    "leptos",
+    "dioxus",
+    "zed-pkg",
+    "sops"
+  ],
+  "source": {
+    "repository": "shared-auth/shared-auth-monorepo",
+    "pull_request": 9,
+    "commit": "38d2091538e96ce7178188f270085f01e8b8f14e",
+    "commit_tree": "65a9ba0b7d726c52ba15afcc7530a63063422fd7",
+    "seed_path": "repository-seeds/shared-auth-web-server.js",
+    "seed_tree": "7f7bb75276add6f79be9369885d96c856c381cfd",
+    "base_archive_sha256": "095c5e0c464aae73b85f399614c0ad11be1acfb67fd2a40a4da4ee1da83cc848",
+    "materialized_tree_sha256": "155a87af95af62029c2a759e83b667494679874595351c4973216f745ed2dd71",
+    "equivalent_rebuilt_archive_sha256": "0f852bb098da1012c18c4a77dde75e81eb09a16fee89917516a30bba3d95c2de",
+    "file_count": 38,
+    "materialized_bytes": 90098
+  },
+  "dependencies": {
+    "ores-otel/ores.otel.log": {
+      "commit": "62e5edba75c34310dea40652cc792fcb7d148c9c",
+      "commit_tree": "24a5b9435c7fad36615774071841004e20d4b3e7",
+      "rust_tree": "75de2857ccda3cc997e8fc323e4ffba428a5750f",
+      "package": "oresoftware-next-loggers",
+      "target": ".deps/ores-otel-log"
+    }
+  },
+  "certification": {
+    "repository": "shared-auth-test/server-api-contract-e2e",
+    "pull_request": 25,
+    "source_lock_schema": "shared-auth-test/exact-repository-seed/v3"
+  },
+  "controls": {
+    "auto_init": false,
+    "delete_branch_on_merge": true,
+    "allow_squash_merge": true,
+    "allow_merge_commit": false,
+    "allow_rebase_merge": false,
+    "allow_auto_merge": false,
+    "branch_protection": {
+      "enforce_admins": true,
+      "required_approving_review_count": 1,
+      "dismiss_stale_reviews": true,
+      "require_code_owner_reviews": true,
+      "require_last_push_approval": true,
+      "required_linear_history": true,
+      "required_conversation_resolution": true,
+      "allow_force_pushes": false,
+      "allow_deletions": false
+    }
+  },
+  "required_environment": "repository-provisioning",
+  "required_secret": "SHARED_AUTH_ORG_REPOSITORY_ADMIN_TOKEN"
+}
