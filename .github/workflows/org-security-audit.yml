@@ -1,0 +1,60 @@
+name: Shared Auth organization security audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      soft_fail:
+        description: Record findings without failing the workflow
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: "17 09 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: shared-auth-org-security-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.repository == 'shared-auth/.github'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_AUDIT_TOKEN }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.13.7"
+      - name: Require a least-privilege organization audit credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${GH_TOKEN:?Configure SHARED_AUTH_ORG_AUDIT_TOKEN as a GitHub App or fine-grained read token}"
+      - name: Audit repository settings, protections, alerts, and workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            --manifest config/shared-auth-repositories.json
+            --output artifacts/shared-auth-org-audit.json
+          )
+          if [[ "${{ inputs.soft_fail || false }}" == "true" ]]; then
+            args+=(--soft-fail)
+          fi
+          python3 scripts/audit-shared-auth-org.py "${args[@]}"
+      - name: Print bounded machine-readable evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f artifacts/shared-auth-org-audit.json ]]; then
+            jq '{schema, owner, repository_count, finding_count, state}' \
+              artifacts/shared-auth-org-audit.json
+          fi
