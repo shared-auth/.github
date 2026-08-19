@@ -130,15 +130,18 @@ def audit_repository(api: GitHubAPI, owner: str, name: str) -> dict[str, Any]:
             "evidence": {},
         }
 
+    # Auto-merge is an operational convenience, not a security control. GitHub
+    # may report it unavailable on repositories that cannot enable protected
+    # branch conditions, so the audit records but does not require it.
     expected_settings = {
         "default_branch": "main",
         "allow_merge_commit": False,
         "allow_squash_merge": True,
         "allow_rebase_merge": True,
         "delete_branch_on_merge": True,
-        "allow_auto_merge": True,
         "allow_update_branch": True,
     }
+    evidence["allow_auto_merge"] = repository.get("allow_auto_merge")
     for key, expected in expected_settings.items():
         actual = repository.get(key)
         evidence[key] = actual
@@ -182,14 +185,19 @@ def audit_repository(api: GitHubAPI, owner: str, name: str) -> dict[str, Any]:
     else:
         findings.append(unavailable(full_name, "branch_protection", status, protection))
 
-    for endpoint, control in [
-        ("vulnerability-alerts", "vulnerability_alerts"),
-        ("automated-security-fixes", "automated_security_fixes"),
-    ]:
+    # GitHub's check endpoints intentionally use different success codes:
+    # vulnerability alerts return 204 when enabled; Dependabot security updates
+    # return 200 when enabled. The PUT enablement endpoints return 204, but this
+    # audit is read-only and therefore checks the GET contracts.
+    security_checks = [
+        ("vulnerability-alerts", "vulnerability_alerts", 204),
+        ("automated-security-fixes", "automated_security_fixes", 200),
+    ]
+    for endpoint, control, expected_status in security_checks:
         status, body = api.request(f"/repos/{owner}/{name}/{endpoint}")
         evidence[f"{control}_http_status"] = status
-        if status != 204:
-            findings.append(finding(full_name, control, status, 204))
+        if status != expected_status:
+            findings.append(finding(full_name, control, status, expected_status))
 
     status, workflow_listing = api.request(f"/repos/{owner}/{name}/contents/.github/workflows?ref={repository['default_branch']}")
     evidence["workflow_listing_http_status"] = status
