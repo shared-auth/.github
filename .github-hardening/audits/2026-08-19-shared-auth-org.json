@@ -1,5 +1,5 @@
 {
-  "finding_count": 108,
+  "finding_count": 83,
   "owner": "shared-auth",
   "repositories": [
     {
@@ -30,13 +30,6 @@
           "http_status": 404,
           "repository": "shared-auth/.github",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/.github",
-          "state": "failed"
         }
       ],
       "repository": "shared-auth/.github",
@@ -61,13 +54,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-server.rs",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -77,13 +63,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-server.rs",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-server.rs",
-          "state": "failed"
         },
         {
           "actual": "actions/checkout@v7",
@@ -185,13 +164,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-lib",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -201,13 +173,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-lib",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-lib",
-          "state": "failed"
         },
         {
           "actual": "actions/checkout@v7",
@@ -288,13 +253,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-interfaces",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -304,13 +262,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-interfaces",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-interfaces",
-          "state": "failed"
         },
         {
           "actual": "persisted or unspecified",
@@ -356,13 +307,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-clients",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -372,13 +316,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-clients",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-clients",
-          "state": "failed"
         },
         {
           "actual": "actions/checkout@v4",
@@ -508,13 +445,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-infra",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -524,13 +454,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-infra",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-infra",
-          "state": "failed"
         },
         {
           "actual": "actions/checkout@v7",
@@ -569,13 +492,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-mcp-server.rs",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -585,13 +501,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-mcp-server.rs",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-mcp-server.rs",
-          "state": "failed"
         },
         {
           "actual": "missing",
@@ -651,13 +560,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-monorepo",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -667,13 +569,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-monorepo",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-monorepo",
-          "state": "failed"
         },
         {
           "actual": "actions/checkout@v7",
@@ -761,13 +656,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth.github.io",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -777,13 +665,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth.github.io",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth.github.io",
-          "state": "failed"
         },
         {
           "actual": "missing",
@@ -815,13 +696,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-e2e",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -831,13 +705,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-e2e",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-e2e",
-          "state": "failed"
         },
         {
           "actual": "missing",
@@ -869,13 +736,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-sync",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -885,13 +745,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-sync",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-sync",
-          "state": "failed"
         },
         {
           "actual": "actions/checkout@v7.0.1",
@@ -993,13 +846,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-nats-bridge.rs",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -1009,13 +855,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-nats-bridge.rs",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-nats-bridge.rs",
-          "state": "failed"
         },
         {
           "actual": "actions/checkout@v4",
@@ -1068,13 +907,6 @@
       },
       "findings": [
         {
-          "actual": false,
-          "control": "repository_settings:allow_auto_merge",
-          "expected": true,
-          "repository": "shared-auth/shared-auth-web-server.js",
-          "state": "failed"
-        },
-        {
           "control": "branch_protection",
           "detail": {
             "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
@@ -1084,13 +916,6 @@
           "http_status": 403,
           "repository": "shared-auth/shared-auth-web-server.js",
           "state": "blocked"
-        },
-        {
-          "actual": 200,
-          "control": "automated_security_fixes",
-          "expected": 204,
-          "repository": "shared-auth/shared-auth-web-server.js",
-          "state": "failed"
         }
       ],
       "repository": "shared-auth/shared-auth-web-server.js",
