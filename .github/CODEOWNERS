@@ -1,0 +1,13 @@
+# Shared Auth organization-wide ownership fallback.
+# Repository-local CODEOWNERS files may add stricter ownership but must not
+# remove review for authentication, authorization, secret, or deployment paths.
+* @ORESoftware
+
+/.github/ @ORESoftware
+/.github/workflows/ @ORESoftware
+/.github/CODEOWNERS @ORESoftware
+/SECURITY.md @ORESoftware
+/.sops.yaml @ORESoftware
+/env/enc/ @ORESoftware
+/deploy/ @ORESoftware
+/migrations/ @ORESoftware
