@@ -1,0 +1,1103 @@
+{
+  "finding_count": 108,
+  "owner": "shared-auth",
+  "repositories": [
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": true,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 404,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Branch not protected",
+            "status": "404"
+          },
+          "http_status": 404,
+          "repository": "shared-auth/.github",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/.github",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/.github",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-node@v7.0.0",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/oauth-patch.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/oauth-patch.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/release.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "docker/setup-buildx-action@v4",
+          "control": ".github/workflows/release.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "docker/login-action@v4.6.0",
+          "control": ".github/workflows/release.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "docker/build-push-action@v7",
+          "control": ".github/workflows/release.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/release.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/sync-graceful-shutdown.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-server.rs",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-server.rs",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-go@v7",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-node@v7",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/ci.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/repository-policy.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/repository-policy.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v4",
+          "control": ".github/workflows/zed-package-contract.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/zed-package-contract.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-lib",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-lib",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-interfaces",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-interfaces",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-interfaces",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/consumer-boundary.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-interfaces",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/zed-package-contract.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-interfaces",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/zed-package.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-interfaces",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-interfaces",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v4",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-go@v6",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/client-matrix.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-python@v5",
+          "control": ".github/workflows/client-matrix.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/client-matrix.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/client-matrix.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/repository-policy.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/repository-policy.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v4",
+          "control": ".github/workflows/zed-package-contract.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v4",
+          "control": ".github/workflows/zed-package-contract.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-node@v4",
+          "control": ".github/workflows/zed-package-contract.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "denoland/setup-deno@v2",
+          "control": ".github/workflows/zed-package-contract.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "oven-sh/setup-bun@v2",
+          "control": ".github/workflows/zed-package-contract.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/zed-package-contract.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/zed-package.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-clients",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-clients",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-infra",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-infra",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-infra",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/repository-policy.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-infra",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/repository-policy.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-infra",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-infra",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-mcp-server.rs",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-mcp-server.rs",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-mcp-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/gha-clone-rust.yml:permissions",
+          "expected": "explicit top-level permissions",
+          "repository": "shared-auth/shared-auth-mcp-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/gha-clone-rust.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-mcp-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/repository-policy.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-mcp-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/repository-policy.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-mcp-server.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/test-org-mcp-wire.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-mcp-server.rs",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-mcp-server.rs",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/repository-policy.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/repository-policy.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v4",
+          "control": ".github/workflows/zed-submodule-boundaries.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-python@v5",
+          "control": ".github/workflows/zed-submodule-boundaries.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/zed-submodule-boundaries.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v4",
+          "control": ".github/workflows/zed-topology.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-python@v5",
+          "control": ".github/workflows/zed-topology.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/zed-topology.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/zed-topology.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-monorepo",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-monorepo",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth.github.io",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth.github.io",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth.github.io",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/opto-sync-real-web.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth.github.io",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth.github.io",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-e2e",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-e2e",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-e2e",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/opto-sync-shared-chaos.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-e2e",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-e2e",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7.0.1",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7.0.1",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/setup-node@v7",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7.0.1",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "subosito/flutter-action@v2",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7.0.1",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/ci.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/ci.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "missing",
+          "control": ".github/workflows/opto-sync-wrapper-resilience.yml:timeouts",
+          "expected": "at least one bounded job timeout",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7.0.1",
+          "control": ".github/workflows/repository-policy.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/repository-policy.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-sync",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-sync",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-nats-bridge.rs",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-nats-bridge.rs",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-nats-bridge.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v4",
+          "control": ".github/workflows/ci.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-nats-bridge.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/ci.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-nats-bridge.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "actions/checkout@v7",
+          "control": ".github/workflows/repository-policy.yml:action_pin",
+          "expected": "full 40-character commit SHA",
+          "repository": "shared-auth/shared-auth-nats-bridge.rs",
+          "state": "failed"
+        },
+        {
+          "actual": "persisted or unspecified",
+          "control": ".github/workflows/repository-policy.yml:checkout_credentials",
+          "expected": false,
+          "repository": "shared-auth/shared-auth-nats-bridge.rs",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-nats-bridge.rs",
+      "state": "failed"
+    },
+    {
+      "evidence": {
+        "actions_can_approve_pull_request_reviews": false,
+        "actions_default_workflow_permissions": "read",
+        "actions_permissions_http_status": 200,
+        "allow_auto_merge": false,
+        "allow_merge_commit": false,
+        "allow_rebase_merge": true,
+        "allow_squash_merge": true,
+        "allow_update_branch": true,
+        "automated_security_fixes_http_status": 200,
+        "branch_protection_http_status": 403,
+        "default_branch": "main",
+        "delete_branch_on_merge": true,
+        "vulnerability_alerts_http_status": 204,
+        "workflow_listing_http_status": 200
+      },
+      "findings": [
+        {
+          "actual": false,
+          "control": "repository_settings:allow_auto_merge",
+          "expected": true,
+          "repository": "shared-auth/shared-auth-web-server.js",
+          "state": "failed"
+        },
+        {
+          "control": "branch_protection",
+          "detail": {
+            "documentation_url": "https://docs.github.com/rest/branches/branch-protection#get-branch-protection",
+            "message": "Upgrade to GitHub Pro or make this repository public to enable this feature.",
+            "status": "403"
+          },
+          "http_status": 403,
+          "repository": "shared-auth/shared-auth-web-server.js",
+          "state": "blocked"
+        },
+        {
+          "actual": 200,
+          "control": "automated_security_fixes",
+          "expected": 204,
+          "repository": "shared-auth/shared-auth-web-server.js",
+          "state": "failed"
+        }
+      ],
+      "repository": "shared-auth/shared-auth-web-server.js",
+      "state": "failed"
+    }
+  ],
+  "repository_count": 13,
+  "schema": "shared-auth/organization-security-audit/v1",
+  "state": "failed"
+}
