@@ -4,6 +4,7 @@ Status: accepted target design; implementation and production evidence remain op
 Decision date: 2026-08-20
 Linear architecture: [Admin/customer authentication data planes and federated customer SSO](https://linear.app/denman/document/admincustomer-authentication-data-planes-and-federated-customer-sso-8a7890cb3c82)
 Contract issue: [DEN-3810](https://linear.app/denman/issue/DEN-3810/shared-auth-interfaceslib-publish-strict-dual-proof-federation)
+Async/formal hardening: [DEN-3812](https://linear.app/denman/issue/DEN-3812/shared-auth-formal-methods-verify-strict-dual-proof-authorization)
 Server/schema: [DEN-2193](https://linear.app/denman/issue/DEN-2193/shared-auth-server-add-realm-isolation-and-federated-customer)
 E2E evidence: [DEN-2194](https://linear.app/denman/issue/DEN-2194/shared-auth-e2e-prove-cross-app-sso-audience-isolation-revocation-and)
 Consumer rollout: [DEN-2197](https://linear.app/denman/issue/DEN-2197/shared-auth-rollout-migrate-consumers-and-remove-authentication)
@@ -63,8 +64,11 @@ This document is a target contract, not a description of current runtime behavio
 - current delegated claims expose global/provider compatibility identifiers and need a versioned pairwise-subject migration;
 - current client and E2E introspection request shapes have drifted from the server's strict request contract;
 - existing federation E2E tests model token minting and verification but do not yet prove the deployed browser-to-server-to-database flow.
+- the current server and client formal artifacts are serialized safety skeletons, not async actor/message or cross-replica proofs; client result events lack operation generations and permit stale-completion ABA traces;
+- generated clients update state before callers execute returned vault effects, so the documented abstract atomicity has no runtime refinement;
+- timeout or loser suppression does not prove remote cancellation, and current race helpers can leave outcome-unknown work without a transaction-bound reconciliation contract.
 
-No current OR/race, handoff, exchange, or synthetic test result may be represented as satisfying this design. DEN-3810, DEN-2193, and DEN-2194 own the contract, runtime, and executable-evidence gaps.
+No current OR/race, handoff, exchange, synchronous model, or synthetic test result may be represented as satisfying this design. [Async authentication state machines and formal verification](ASYNC-AUTH-STATE-MACHINES-AND-FORMAL-VERIFICATION.md) and DEN-3812 define the required generations, linearization points, obligations, refinement tests, fairness assumptions, and evidence levels. DEN-3810, DEN-2193, DEN-3812, and DEN-2194 own the contract, runtime, formal/refinement, and executable-evidence gaps.
 
 ## Supabase organization and project topology
 
@@ -775,6 +779,7 @@ No phase is complete merely because its documentation or schema merged. Exact-re
 |---|---|---|
 | Organization architecture and routing | shared-auth/.github | DEN-2189 |
 | Versioned identity/proof/guard contract | shared-auth-interfaces, shared-auth-lib | DEN-3810 |
+| Async state/event contract, formal model, concurrency and refinement evidence | shared-auth-interfaces, shared-auth-server.rs, shared-auth-clients, shared-auth-lib | DEN-3812 |
 | Federation server, OIDC, schema, sessions, linking | shared-auth-server.rs | DEN-2193 |
 | RDS, network, secrets, backup, restore | shared-auth-infra | DEN-2191 |
 | Cross-project, cross-RDS, outage, replay, restore tests | shared-auth-e2e and shared-auth-test | DEN-2194 |

@@ -6,6 +6,7 @@ This public `.github` repository is the canonical home for **shared-auth** organ
 - Linear project: https://linear.app/denman/project/githubcomshared-auth-acbca07bb390
 - Project and repository map: [`PROJECTS.md`](PROJECTS.md)
 - Federated dual-proof and three-RDS architecture: [`docs/FEDERATED-DUAL-PROOF-ARCHITECTURE.md`](docs/FEDERATED-DUAL-PROOF-ARCHITECTURE.md)
+- Async state-machine, concurrency, and formal-verification design: [`docs/ASYNC-AUTH-STATE-MACHINES-AND-FORMAL-VERIFICATION.md`](docs/ASYNC-AUTH-STATE-MACHINES-AND-FORMAL-VERIFICATION.md)
 - Organization profile source: [`profile/README.md`](profile/README.md)
 - Canonical lowercase agent policy: [`agents.md`](agents.md)
 - Compatibility pointer: [`AGENTS.md`](AGENTS.md)
