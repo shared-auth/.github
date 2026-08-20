@@ -2,7 +2,7 @@
 
 ## Report vulnerabilities privately
 
-Do **not** open a public issue, discussion, pull request, commit, artifact, or public Linear comment for a suspected vulnerability, authentication bypass, exposed credential, data leak, or sensitive infrastructure weakness.
+Do not open a public issue, discussion, pull request, commit, artifact, or public Linear comment for a suspected vulnerability, authentication bypass, exposed credential, data leak, or sensitive infrastructure weakness.
 
 Use private vulnerability reporting from the affected repository's **Security** tab when available. Otherwise contact an organization owner through a previously verified private operational channel and request a secure reporting route. Share only the minimum information needed to establish that channel.
 
