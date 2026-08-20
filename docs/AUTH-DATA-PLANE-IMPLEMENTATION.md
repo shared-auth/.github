@@ -72,7 +72,7 @@ This checkpoint makes no claim that any of the following occurred:
 ### DEN-2193 — runtime and schema
 
 1. Run the exact merge revision through Rust format, Clippy, tests, disposable-Postgres schema application, browser WebAuthn, audit, and image build on a functioning runner.
-2. Create reviewed admin/customer deployment overlays only after the new databases and secret mappings exist.
+2. Create reviewed admin/customer deployment overlays only after the new databases and secret mappings exist. Repository-owned configuration follows `env/enc/*.env.enc` SOPS ciphertext to ignored `env/dec/*.env` plaintext, with the exact profile allowlisted under the organization environment-ownership policy; production values remain authoritative in the protected deployment secret store.
 3. Configure one dedicated Supabase project per realm and exact realm-specific endpoint/key/cookie/issuer values.
 4. Prove customer tokens fail at admin and admin tokens fail at customer.
 5. Prove App A rejects App B tokens and vice versa against the deployed implementation.
@@ -80,7 +80,7 @@ This checkpoint makes no claim that any of the following occurred:
 ### DEN-2194 — evidence
 
 1. Run the exact E2E merge revision on a functioning runner.
-2. Inject disposable realm, App-A/App-B, and pre-revoked-session fixtures through approved secret storage.
+2. Inject disposable realm, App-A/App-B, and pre-revoked-session fixtures through approved secret storage or an approved `env/enc/*.env.enc` test profile; never commit, log, or archive the corresponding `env/dec/*.env` plaintext.
 3. Record revocation latency, application-RDS auth-query count, connection use, and authentication p95/p99 under load.
 4. Restore admin and customer snapshots independently and record snapshot IDs, timestamps, recovered revision/schema, and verification results.
 5. Perform the reviewed one-realm outage drill and prove the other realm remains healthy.

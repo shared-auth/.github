@@ -341,6 +341,21 @@ Do not add blanket fairness that hides starvation. Do not claim progress during 
 
 Apalache is not a blocking required gate until its isolated, pinned runtime is accepted under DEN-3752 or an approved exception records the exact toolchain. A CI run that is not admitted and explores zero states is not a pass.
 
+## Secret material and evidence fixtures
+
+Runtime-owner repositories use the organization [SOPS/Nix/Just environment contract](../ENVIRONMENT_OWNERSHIP.md):
+
+```text
+env/enc/*.env.enc   -> tracked ciphertext for an approved profile
+env/dec/*.env       -> ignored owner-only plaintext for the same profile
+```
+
+The wildcard is a path grammar, not a broad allowlist. The exact profile and credential class must be approved for the owning repository. Prefer `sops exec-env` so a test process receives decrypted values without a persistent plaintext file. Where a tool requires `env/dec/<profile>.env`, the directory and file are owner-only and the value is never logged, uploaded, cached, or copied into a counterexample.
+
+Formal states, ITF/JSONL traces, property-test seeds, database fixtures, screenshots, and CI artifacts are secret-free. They contain opaque synthetic identifiers and bounded enums only. Tests that need live integrations use disposable least-privilege credentials supplied from approved secret storage; the evidence records configuration hashes and secret versions/references, never the values.
+
+Ephemeral access/refresh tokens, authorization codes, session cookies, OTP/recovery material, and user data remain protocol state. They are not converted into static environment variables or repository ciphertext. Crash/retry tests use synthetic substitutes and assert redaction at every observable boundary.
+
 ## Required conformance traces
 
 Publish versioned, secret-free ITF/JSONL traces with virtual time for:
