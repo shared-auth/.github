@@ -59,6 +59,7 @@ This document is a target contract, not a description of current runtime behavio
 - the server schema declares applications, application accounts, OAuth clients, consent, and session-to-application grants, but the active browser login path does not yet enforce that complete model;
 - the current browser handoff returns an encrypted Supabase token bundle for later exchange rather than atomically producing a strict dual-proof federation session;
 - the current realm contract assumes one Supabase project per realm and must be extended to distinguish one root proof project from registered subsystem projects;
+- current provider tenancy can depend on a mutable configured project name; strict identity must migrate to the cryptographically verified issuer or immutable project ref plus subject;
 - current delegated claims expose global/provider compatibility identifiers and need a versioned pairwise-subject migration;
 - current client and E2E introspection request shapes have drifted from the server's strict request contract;
 - existing federation E2E tests model token minting and verification but do not yet prove the deployed browser-to-server-to-database flow.
@@ -226,6 +227,8 @@ The following is an ownership sketch. The exact schema belongs in the declarativ
     )
 
 The parent Supabase identity is one external identity. A Shared Auth native credential is a separate credential/factor bound to the same principal, not a second row created from email equality.
+
+provider_tenant is an immutable project ref or a value derived from the cryptographically verified issuer. A mutable display name, registry alias, organization slug, or dashboard project name cannot participate in the uniqueness key.
 
 ### Contact points
 

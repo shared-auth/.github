@@ -7,6 +7,16 @@
 
 This checkpoint records what is merged in Git and what remains a protected operational gate. It is not a production-completion declaration.
 
+## Post-checkpoint federation clarification — 2026-08-20
+
+The merged realm/schema contracts in this checkpoint do not implement the later strict subsystem requirement that a native Shared Auth proof and a parent Supabase proof both be current, independently established, and linked to the same principal.
+
+The current reusable dual-auth guard is an OR/first-success compatibility path, and the current browser handoff is not an atomic strict dual-proof application grant. Declared application, application-account, OAuth-client, consent, and grant tables are schema groundwork until the compiled browser/OIDC runtime enforces them. Existing synthetic federation tests are contract evidence, not deployed end-to-end evidence.
+
+The accepted target is now documented in [Federated dual-proof subsystem authentication](FEDERATED-DUAL-PROOF-ARCHITECTURE.md) and tracked by [DEN-3810](https://linear.app/denman/issue/DEN-3810/shared-auth-interfaceslib-publish-strict-dual-proof-federation), [DEN-2193](https://linear.app/denman/issue/DEN-2193/shared-auth-server-add-realm-isolation-and-federated-customer), [DEN-2194](https://linear.app/denman/issue/DEN-2194/shared-auth-e2e-prove-cross-app-sso-audience-isolation-revocation-and), and [DEN-2197](https://linear.app/denman/issue/DEN-2197/shared-auth-rollout-migrate-consumers-and-remove-authentication).
+
+No OR/race, Supabase-token exchange, handoff, schema-only, or synthetic-test result may be represented as completing that stricter design.
+
 ## Merged implementation evidence
 
 | Workstream | Linear | GitHub evidence | What is now in source |
