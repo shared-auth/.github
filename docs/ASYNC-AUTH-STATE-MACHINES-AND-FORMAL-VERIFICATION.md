@@ -346,11 +346,11 @@ Apalache is not a blocking required gate until its isolated, pinned runtime is a
 Runtime-owner repositories use the organization [SOPS/Nix/Just environment contract](../ENVIRONMENT_OWNERSHIP.md):
 
 ```text
-env/enc/*.env.enc   -> tracked ciphertext for an approved profile
+env/enc/*.env.enc   -> ignored local ciphertext for an approved profile
 env/dec/*.env       -> ignored owner-only plaintext for the same profile
 ```
 
-The wildcard is a path grammar, not a broad allowlist. The exact profile and credential class must be approved for the owning repository. Prefer `sops exec-env` so a test process receives decrypted values without a persistent plaintext file. Where a tool requires `env/dec/<profile>.env`, the directory and file are owner-only and the value is never logged, uploaded, cached, or copied into a counterexample.
+The wildcard is a path grammar, not a broad allowlist. The exact profile and credential class must be approved for the owning repository. Both directories are Git-ignored, with `*.env`, `**.env`, `**/*.env`, and `**/**/*.env` providing explicit plaintext coverage. Do not force-add either form. Prefer `sops exec-env` so a test process receives decrypted values without a persistent plaintext file. Where a tool requires `env/dec/<profile>.env`, the directory and file are owner-only and the value is never logged, uploaded, cached, or copied into a counterexample.
 
 Formal states, ITF/JSONL traces, property-test seeds, database fixtures, screenshots, and CI artifacts are secret-free. They contain opaque synthetic identifiers and bounded enums only. Tests that need live integrations use disposable least-privilege credentials supplied from approved secret storage; the evidence records configuration hashes and secret versions/references, never the values.
 

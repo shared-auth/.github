@@ -664,20 +664,21 @@ Normal product requests validate local tokens and perform local user/authorizati
 Repositories that own runtime environment state use the organization SOPS/Nix/Just convention documented in [Shared Auth environment ownership](../ENVIRONMENT_OWNERSHIP.md):
 
 ```text
-env/enc/*.env.enc   # tracked SOPS ciphertext for an approved profile
+env/enc/*.env.enc   # ignored local SOPS ciphertext for an approved profile
 env/dec/*.env       # ignored, owner-only plaintext for the same profile
 ```
 
-The `*` is one reviewed profile basename, not an unrestricted file allowlist. The current baseline permits `dev` and `prod`; adding another profile or credential class requires an ownership-matrix review, an exact SOPS creation rule, an explicit Git allowlist, and policy tests. A repository classified `no-secrets` or `references-only` cannot gain secret ownership merely by following the path pattern.
+The `*` is one reviewed profile basename, not an unrestricted file allowlist. The current baseline permits `dev` and `prod`; adding another profile or credential class requires an ownership-matrix review, an exact SOPS creation rule, and policy tests. A repository classified `no-secrets` or `references-only` cannot gain secret ownership merely by following the path pattern.
 
-- Track only SOPS ciphertext in `env/enc/`; never track anything under `env/dec/`.
+- Ignore both `env/enc/` and `env/dec/`; do not force-add ciphertext or plaintext.
+- Include the literal `*.env`, `**.env`, `**/*.env`, and `**/**/*.env` rules in repository `.gitignore` files.
 - Use the pinned Nix development shell and reviewed Just recipes for SOPS operations. Dotenv auto-loading stays disabled.
 - Prefer `sops exec-env` for one-process use. If plaintext must be materialized, create it with owner-only directory/file permissions and never print it, attach it, or include it in an artifact.
 - Store only the credential classes owned by that repository. Keep production values authoritative in the protected deployment secret store; repository ciphertext is not the production source of truth.
 - SOPS recipients in Git are public encryption identities only. Private age/KMS material never enters a repository, environment example, issue, PR, Linear document, log, cache, or build artifact.
 - `.env.example` contains names and non-secret placeholders only. SOPS protects values but may expose key names and structure, so do not use personal data or secret values as keys.
 - Long-lived service/bootstrap credentials must be least-privilege and environment-specific. User access/refresh tokens, authorization codes, cookies, OTP/recovery values, and other ephemeral protocol state are never static environment configuration, even when encrypted.
-- CI validates ignored plaintext, exact ciphertext allowlists, recipient separation, private-key signatures, and tracked-file scans before accepting an environment-policy change.
+- CI validates ignored ciphertext and plaintext, exact SOPS creation rules, recipient separation, private-key signatures, and tracked-file scans before accepting an environment-policy change.
 
 The admin realm, customer realm, root Supabase project, every subsystem project, and every application database use distinct secret profiles and deployment-store bindings. A value must not be copied between realms merely because the file format is shared.
 
