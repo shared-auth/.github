@@ -10,3 +10,7 @@
 - Any existing `*-monorepo/apps/...` submodule whose remote points to a `*-infra` repository is non-conforming and should be removed.
 
 Repository scaffolding, migration tooling, and automated agents must preserve this boundary unless the policy is explicitly revised.
+
+## Persistence contracts
+
+Product database contracts are owned in this org’s `*-lib-core` under the dual-source model in [docs/PERSISTENCE_AUTHORITY.md](docs/PERSISTENCE_AUTHORITY.md). `ORESoftware/k8s-libs-and-shared-defs` retains platform SQL and the fleet catalog only.
