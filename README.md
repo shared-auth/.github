@@ -88,7 +88,3 @@ Repository-local policy may be stricter—particularly around authentication, au
 
 The public registry withholds private repository names and edges.
 <!-- END MANAGED REPOSITORY RELATIONSHIPS v1 -->
-
-## Persistence
-
-See [docs/PERSISTENCE_AUTHORITY.md](docs/PERSISTENCE_AUTHORITY.md) for TypeSpec / JSON Schema / Diesel / SeaORM / dpm ownership (product SQL leaves shared-defs).
