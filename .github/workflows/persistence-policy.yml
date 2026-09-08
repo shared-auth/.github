@@ -41,5 +41,28 @@ jobs:
           status=$?
           set -e
           test "$status" -eq 2
+      - name: Read the exact historical defective policy bundle
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: 003299d942519108282953630d9c39d34e90a271
+          path: tmp/persistence-policy/pre-fix
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /agents.md
+            /AGENTS.md
+            /REPOSITORY_BOUNDARIES.md
+            /docs/PERSISTENCE_AUTHORITY.md
+            /docs/PERSISTENCE_DUAL_SOURCE.md
+      - name: Prove the historical defective bundle fails closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd tmp/persistence-policy/pre-fix && "$GITHUB_WORKSPACE/tmp/persistence-policy/check") >tmp/persistence-policy/pre-fix.log 2>&1
+          status=$?
+          set -e
+          test "$status" -eq 1
+          grep -Fx 'persistence-policy: MissingBlock' tmp/persistence-policy/pre-fix.log
       - name: Check the active repository policy bundle
         run: tmp/persistence-policy/check
