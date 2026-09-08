@@ -13,4 +13,4 @@ Repository scaffolding, migration tooling, and automated agents must preserve th
 
 ## Persistence contracts
 
-Product database contracts are owned in this org’s `*-lib-core` under the dual-source model in [docs/PERSISTENCE_AUTHORITY.md](docs/PERSISTENCE_AUTHORITY.md). `ORESoftware/k8s-libs-and-shared-defs` retains platform SQL and the fleet catalog only.
+`shared-auth-interfaces` owns independently authored, co-equal TypeSpec and JSON Schema/OpenAPI product database contracts. `shared-auth-lib-core` pins those sources and owns candidates, parity evidence, PostgreSQL extension SQL, and certified desired-state releases. `shared-auth-orm-core` owns Diesel and SeaORM runtime access; `shared-auth-infra` alone owns reviewed DPM plan/verify/apply. See [docs/PERSISTENCE_AUTHORITY.md](docs/PERSISTENCE_AUTHORITY.md). `ORESoftware/k8s-libs-and-shared-defs` retains platform SQL and the fleet catalog only.

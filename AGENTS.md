@@ -86,3 +86,20 @@ This organization policy overrides generic feature-branch and worktree defaults 
 - Concurrent agents must coordinate repository and file ownership through the available agent communication channel, keep edits scoped, inspect live state before each write, and hand off cleanly. Coordinate instead of isolating routine work in worktrees.
 - Preserve unrelated in-progress changes and never overwrite another agent's work. If safe ownership of overlapping files cannot be established, pause that overlapping edit and coordinate before continuing.
 <!-- ore-primary-branch-policy:end -->
+
+<!-- persistence-authority:begin -->
+## Persistence authority (TypeSpec + JSON Schema + Diesel + SeaORM)
+
+Product database contracts are independently authored peer sources in `shared-auth-interfaces`, not in `ORESoftware/k8s-libs-and-shared-defs` or `shared-auth-lib-core`.
+
+Before changing schema, ORM adapters, or migrations, read [`docs/PERSISTENCE_AUTHORITY.md`](docs/PERSISTENCE_AUTHORITY.md).
+
+- **Peer source A:** independently authored persistence TypeSpec in `shared-auth-interfaces`.
+- **Peer source B:** independently authored persistence JSON Schema/OpenAPI in `shared-auth-interfaces`. Neither peer is derived from, subordinate to, or overwritten by the other.
+- **Certified release:** `shared-auth-lib-core` pins both peer sources and owns SQL/catalog/ORM candidates, PostgreSQL extension SQL, parity evidence, and the certified desired-state release. Disagreement blocks release; neither source wins automatically.
+- **Runtime:** Diesel + diesel-async primary and SeaORM DB-first runtime/catalog witness in `shared-auth-orm-core`; runtime libraries do not author a competing schema or hold migration credentials.
+- **Apply:** `shared-auth-infra` alone owns reviewed [declarative-migrations](https://github.com/declarative-migrations) (`dpm`) plan/verify/apply for the pinned `desired.sql`; no DDL at API/web boot.
+- **Fleet plan:** [general-migration-plan](https://linear.app/denman/document/general-migration-plan-f76fadd4cbb2) revision i.
+
+Do not land new product SQL or ORM generation in shared-defs for this org. Keep customer/admin authorization boundaries distinct during the shared-Supabase deployment exception.
+<!-- persistence-authority:end -->
