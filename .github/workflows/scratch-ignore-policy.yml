@@ -1,0 +1,26 @@
+name: scratch-ignore-policy
+
+on:
+  pull_request:
+  push:
+    branches: [main, dev, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scratch-ignore-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out the exact test tree without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run immutable shared Rust and native Git regression checks
+        uses: ORESoftware/.github/.github/actions/scratch-ignore-policy@cf274f5fadeb3ff9ec884de4a2f653f7266f814a
