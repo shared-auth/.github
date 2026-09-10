@@ -22,14 +22,17 @@ Every consumer policy declares `schema_version = 1` plus compatibility with `htt
 
 Range admission is an ancestry check, never lexical SHA ordering. A policy outside the running interfaces revision is a startup failure.
 
+The first mainline `shared-auth-interfaces` revision containing this contract is merge commit `52b7ac7fbf0c7c169684f613eda923f3aa6c82e9`; central and consumer configs should prefer a durable mainline revision/range rather than an abandoned feature-branch-only SHA.
+
 ## Current delivery chain
 
-- `shared-auth/shared-auth-interfaces#51` — peer TypeSpec + Draft 2020-12 authorities, exact/range provenance, typed 2FA/3FA/page/theme enums and differential corpus.
-- `shared-auth/shared-auth-lib-core#15` — strict TOML deserialization, central defaults, deterministic project overlay, alias collision handling and revision admission.
-- `shared-auth/shared-auth-cli#4` — canonical `flags-2-env` argv/env boundary with build-time `.cli-flags.toml` audit; `.shared-auth.toml` remains the separate policy layer.
-- `flags-2-env/flags-2-env#13` / DEN-1799 — fail-closed native `.cli-flags.toml` audit for unsupported tables/keys, validated across the native and Rust suites before publication.
+- `shared-auth/shared-auth-interfaces#51` — **merged** as `52b7ac7fbf0c7c169684f613eda923f3aa6c82e9`; establishes peer TypeSpec + Draft 2020-12 authorities, exact/range provenance, typed 2FA/3FA/page/theme enums and the initial differential corpus.
+- `shared-auth/shared-auth-interfaces#52` — open TJSV language/runtime promotion layer pinned to immutable TJSV GitHub commit `4a5d049218adc2740d4cf78f612caf7f38f6f64c`; requires Rust/native + TypeScript/Node ingress/egress evidence, parity receipt, Contract IR, exact artifact digests and `verifyLanguageBoundariesAgainstCurrentInputs()`. Its corpus currently contains 4 valid round-trip fixtures and 14 expected-invalid fixtures.
+- `shared-auth/shared-auth-lib-core#15` — strict TOML deserialization, central defaults, deterministic project overlay, alias collision handling and revision admission. Its central policy is pinned to `52b7ac7...`.
+- `shared-auth/shared-auth-cli#4` — canonical `flags-2-env` argv/env boundary with build-time `.cli-flags.toml` audit; `.shared-auth.toml` remains the separate policy layer and is pinned to `52b7ac7...`.
+- `flags-2-env/flags-2-env#13` / DEN-1799 — **merged** as `b708a041531a830bd49f030250836896096e7abd` after all 17 exact-head repository workflows passed; the native parser now fails closed on unsupported `.cli-flags.toml` tables/keys without adding a second TOML parser.
 
-Shared-auth repository Actions are presently affected by DEN-2906. A zero-step Actions failure is an infrastructure/admission failure, not code-green evidence; affected PRs must not be merged merely because their diffs are mergeable.
+Shared-auth **source** repository Actions are presently affected by DEN-2906. A zero-step Actions failure is an infrastructure/admission failure, not code-green evidence; affected PRs must not be merged merely because their diffs are mergeable. The `shared-auth/.github` policy repository currently executes its own policy workflows normally, so documentation/governance PRs still require and can obtain ordinary exact-head CI evidence.
 
 ## Workstream A — TJSV language/runtime admission
 
@@ -42,6 +45,8 @@ The schema parity check is necessary but not sufficient. Before config-derived r
 5. emit one closed evidence envelope per required language/runtime, binding the exact source revision, artifact digest, parity `runId`, Contract IR `irId`, generator/toolchain and validation results;
 6. call TJSV `verifyLanguageBoundariesAgainstCurrentInputs()` against the exact current TypeSpec, generated witness and authored Schema A;
 7. promote only when the verification status is `passed` and `zeroUnexplainedFindings` is true.
+
+PR #52 implements this sequence. Until DEN-2906 clears, its GitHub job is created but executes zero steps; secondary local TypeScript evidence may catch implementation errors but does not replace the required exact-head GitHub Rust + TypeScript + TJSV evidence.
 
 Related existing Linear work: DEN-3959, DEN-3596 and DEN-3830. A dedicated child issue was attempted on 2026-09-09 but Linear rejected creation because the workspace issue limit is exhausted; the work remains explicitly tracked under DEN-606 until the limit is lifted.
 
