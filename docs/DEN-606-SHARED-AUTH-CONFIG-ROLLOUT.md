@@ -27,28 +27,32 @@ The first mainline `shared-auth-interfaces` revision containing this contract is
 ## Current delivery chain
 
 - `shared-auth/shared-auth-interfaces#51` — **merged** as `52b7ac7fbf0c7c169684f613eda923f3aa6c82e9`; establishes peer TypeSpec + Draft 2020-12 authorities, exact/range provenance, typed 2FA/3FA/page/theme enums and the initial differential corpus.
-- `shared-auth/shared-auth-interfaces#52` — open TJSV language/runtime promotion layer pinned to immutable TJSV GitHub commit `4a5d049218adc2740d4cf78f612caf7f38f6f64c`; requires Rust/native + TypeScript/Node ingress/egress evidence, parity receipt, Contract IR, exact artifact digests and `verifyLanguageBoundariesAgainstCurrentInputs()`. Its corpus currently contains 4 valid round-trip fixtures and 14 expected-invalid fixtures.
-- `shared-auth/shared-auth-lib-core#15` — strict TOML deserialization, central defaults, deterministic project overlay, alias collision handling and revision admission. Its central policy is pinned to `52b7ac7...`.
-- `shared-auth/shared-auth-cli#4` — canonical `flags-2-env` argv/env boundary with build-time `.cli-flags.toml` audit; `.shared-auth.toml` remains the separate policy layer and is pinned to `52b7ac7...`.
+- `shared-auth/shared-auth-interfaces#53` — open TJSV language/runtime promotion layer pinned to immutable TJSV GitHub commit `4a5d049218adc2740d4cf78f612caf7f38f6f64c`; requires **Rust 1.88, TypeScript/Node 22.16 and Go 1.23.2** ingress/egress evidence, parity receipt, Contract IR, exact artifact digests and `verifyLanguageBoundariesAgainstCurrentInputs()`. Its exact producer head currently contains 5 valid and 18 expected-invalid differential/runtime fixtures.
+- `shared-auth/shared-auth-lib-core#15` — strict TOML deserialization, central defaults, deterministic project overlay, alias collision handling and revision admission. Its central policy is pinned to `52b7ac7...`, and its recommended startup path atomically checks both the central policy and downstream project policy against the same current interfaces revision before returning usable configuration.
+- `shared-auth/shared-auth-cli#4` — canonical `flags-2-env` argv/env boundary with build-time `.cli-flags.toml` audit; `.shared-auth.toml` remains the separate policy layer and is pinned to `52b7ac7...`. Both runtime/build `flags2env` dependencies now pin merged strict-audit commit `b708a041...`.
 - `flags-2-env/flags-2-env#13` / DEN-1799 — **merged** as `b708a041531a830bd49f030250836896096e7abd` after all 17 exact-head repository workflows passed; the native parser now fails closed on unsupported `.cli-flags.toml` tables/keys without adding a second TOML parser.
+- `flags-2-env/flags-2-env#14` / DEN-1799 — **merged** as `c7f720d7501921b5a1b42c395b5a6fe271f24332` after all 10 triggered exact-head workflows passed; adds an executable Shared Auth CLI consumer fixture covering audit, command selection, defaults, boolean negation, API-base override and config-path mapping on healthy flags infrastructure.
+- `ORESoftware/typespec-json-schema-validator#115` / DEN-3959 — open independent immutable-producer lane for `shared-auth-interfaces#53`. Because the producer repository is private and TJSV's repository-scoped Actions token intentionally has no cross-org access, the lane uses a reviewed snapshot of producer revision `7c4f6ec1ceb81e12c7bcb31263a7e1d6020120a9` rather than a PAT. The snapshot records and verifies every original Git blob identity before TJSV or runtime execution.
 
-Shared-auth **source** repository Actions are presently affected by DEN-2906. A zero-step Actions failure is an infrastructure/admission failure, not code-green evidence; affected PRs must not be merged merely because their diffs are mergeable. The `shared-auth/.github` policy repository currently executes its own policy workflows normally, so documentation/governance PRs still require and can obtain ordinary exact-head CI evidence.
+Shared-auth **source** repository Actions remain affected by DEN-2906. A zero-step Actions failure is an infrastructure/admission failure, not code-green evidence; affected PRs must not be merged merely because their diffs are mergeable. Independent TJSV/flags consumer lanes may find real defects and provide supplemental evidence, but they do not impersonate or bypass the producer repository's required merge evidence.
 
 ## Workstream A — TJSV language/runtime admission
 
-The schema parity check is necessary but not sufficient. Before config-derived runtime artifacts are promoted:
+Schema parity is necessary but not sufficient. Before config-derived runtime artifacts are promoted:
 
-1. run `tjsv check` over the exact TypeSpec, authored JSON Schema and differential corpus;
+1. run `tjsv check` over the exact TypeSpec, authored JSON Schema and complete differential corpus;
 2. retain the deterministic parity receipt and emit the parity-approved Contract IR;
-3. run config-specific ingress and egress conformance in at least Rust and TypeScript using the same valid/invalid corpus;
-4. declare `ores.typespec-json-schema-validator.language-boundaries/v1` with at least two required distinct languages and `generatedWitness = evidence_only`;
-5. emit one closed evidence envelope per required language/runtime, binding the exact source revision, artifact digest, parity `runId`, Contract IR `irId`, generator/toolchain and validation results;
+3. run config-specific ingress and egress conformance in Rust, TypeScript/Node and Go using the same automatically enumerated valid/invalid corpus;
+4. declare `ores.typespec-json-schema-validator.language-boundaries/v1` with all three languages required and `generatedWitness = evidence_only`;
+5. emit one closed evidence envelope per required language/runtime, binding the exact source revision, adapter artifact digest, parity `runId`, Contract IR `irId`, generator/toolchain and validation results;
 6. call TJSV `verifyLanguageBoundariesAgainstCurrentInputs()` against the exact current TypeSpec, generated witness and authored Schema A;
-7. promote only when the verification status is `passed` and `zeroUnexplainedFindings` is true.
+7. promote only when the verification status is `passed`, `zeroUnexplainedFindings` is true, and every expected receipt/evidence file exists.
 
-PR #52 implements this sequence. Until DEN-2906 clears, its GitHub job is created but executes zero steps; secondary local TypeScript evidence may catch implementation errors but does not replace the required exact-head GitHub Rust + TypeScript + TJSV evidence.
+PR #53 implements this sequence in the producer repository. Its corpus now makes provenance/versioning, enum closure, unique/nonempty sets, nullability, closed objects and styling bounds explicit. The runtime tests enumerate corpus directories rather than naming individual files, so adding a TJSV fixture automatically creates a Rust/TypeScript/Go obligation.
 
-Related existing Linear work: DEN-3959, DEN-3596 and DEN-3830. A dedicated child issue was attempted on 2026-09-09 but Linear rejected creation because the workspace issue limit is exhausted; the work remains explicitly tracked under DEN-606 until the limit is lifted.
+`ORESoftware/typespec-json-schema-validator#115` runs an independently hosted copy of the exact immutable producer inputs. Its first attempt demonstrated that a repository-scoped TJSV token cannot access the private Shared Auth repository; the lane was deliberately redesigned around byte-verified source snapshots instead of introducing a wider credential.
+
+Related existing Linear work: DEN-3959, DEN-3596 and DEN-3830. Dedicated child creation remains constrained by the Linear workspace issue limit, so explicit workstreams remain tracked under DEN-606 and the relevant existing issues.
 
 ## Workstream B — runtime adoption
 
@@ -60,24 +64,25 @@ Apply the same startup sequence to the CLI, web server, API server, admin web se
 4. load central Shared Auth policy from `shared-auth-lib-core`;
 5. locate exactly one project policy filename and parse it strictly;
 6. resolve the consumer overlay over central defaults;
-7. verify the policy admits the exact interfaces revision;
+7. atomically verify both central and project policies admit the exact interfaces revision;
 8. only then initialize network/database/auth application state.
 
 No executable may fall back to an ad-hoc argv parser, direct environment interpretation, an independent Shared Auth TOML parser or permissive defaults after a config error.
 
 ## Workstream C — fleet compliance
 
-The organization-level audit must eventually scan Shared Auth consumers and report, without auto-rewriting policy:
+The organization-level audit must scan Shared Auth consumers and report, without auto-rewriting policy:
 
 - canonical/legacy filename presence and collisions;
 - invalid or stale interface provenance;
 - schema/TJSV failures;
 - unknown/duplicate/empty enum-set values;
 - consumers that still use only the legacy filename after the migration cutoff;
-- whether runtime entrypoints actually load the resolved policy rather than merely carrying the file.
+- whether runtime entrypoints actually load the resolved policy rather than merely carrying the file;
+- whether executable argv/env handling is the canonical `flags-2-env` boundary and pins a strict-audit-capable revision.
 
-The output should be a deterministic adoption matrix suitable for DEN-2843-style rollout tracking.
+The output should be a deterministic adoption matrix suitable for DEN-2843-style rollout tracking. Contract parsing/enum semantics remain owned by the interface authority and runtime library; the fleet scanner must not become an independent policy parser.
 
 ## Merge evidence rule
 
-A PR is ready only when its exact head has authoritative test evidence. Mergeability without executed validation is insufficient. Conflicts are resolved semantically using repository history and cross-repository contract context per `ORESoftware/my-ai/AGENTS.md`; do not rebase, force-push, reset or discard either side wholesale.
+A PR is ready only when its exact head has authoritative test evidence. Mergeability without executed validation is insufficient. Supplemental cross-repository evidence is useful but never a branch-protection bypass. Conflicts are resolved semantically using repository history and cross-repository contract context per `ORESoftware/my-ai/AGENTS.md`; do not rebase, force-push, reset or discard either side wholesale.
