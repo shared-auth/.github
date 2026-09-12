@@ -1,40 +1,29 @@
-# Security policy
+# Shared Auth security policy
 
-## Reporting a vulnerability
+## Report vulnerabilities privately
 
-Do not disclose vulnerabilities, exploit details, access or refresh tokens, session cookies, credentials, OTP material, recovery codes, biometric data, personal data, or production data in a public issue, discussion, pull request, commit, or Linear comment.
+Do not open a public issue, discussion, pull request, commit, artifact, or public Linear comment for a suspected vulnerability, authentication bypass, exposed credential, data leak, or sensitive infrastructure weakness.
 
-Use the affected repository's **Security** tab and private vulnerability-reporting flow when it is available. If private reporting is not enabled, contact the organization maintainers through a verified private channel shown on the organization or maintainer profile. Share only the minimum information needed to establish contact until a private channel is confirmed.
+Use private vulnerability reporting from the affected repository's **Security** tab when available. Otherwise contact an organization owner through a previously verified private operational channel and request a secure reporting route. Share only the minimum information needed to establish that channel.
 
-Include the affected repository and version, impact, prerequisites, reproducible steps, and a minimal proof of concept using synthetic identities and redacted artifacts. Maintainers should acknowledge, triage, remediate, validate, and coordinate disclosure before creating public follow-up work.
+A useful report identifies the affected repository and full revision, impact, prerequisites, a minimal reproduction using synthetic identities and redacted artifacts, and a safe contact method. Do not access data beyond what is necessary to demonstrate the issue, disrupt production, persist access, or publish exploit details before coordinated remediation.
 
-## Handling sensitive material
+## Sensitive material
 
-Never commit live credentials, tokens, cookies, OTP seeds, recovery codes, biometric templates, customer data, or production identity data. Rotate or revoke exposed credentials through an approved human-run incident procedure; automated agents must not invalidate production credentials or sessions on their own. Preserve evidence non-destructively and avoid commands that rewrite history or purge data.
+Never commit or publish live access or refresh tokens, session cookies, credentials, private keys, OTP seeds, recovery codes, raw biometric data or templates, customer data, production identity data, database exports, or decrypted environment files.
 
-<!-- ore-org-baseline:begin -->
-## Reporting a vulnerability
+Treat any credential exposed in chat, logs, commits, issues, pull requests, build artifacts, screenshots, test fixtures, or public Linear content as compromised. Stop using it, revoke or rotate it through an approved human-run incident procedure, replace dependent configuration, and audit recent use. Removing a secret from the latest file does not invalidate it or erase earlier copies. Repository-history rewriting requires explicit authorization and coordinated review.
 
-Do **not** open a public issue for a suspected vulnerability, exposed credential, authentication bypass, data leak, or sensitive infrastructure weakness.
+Automated agents must preserve evidence non-destructively and must not independently revoke production sessions or credentials unless a reviewed incident procedure expressly authorizes that exact action.
 
-Use private vulnerability reporting from the **Security** tab of the affected repository when available. Otherwise contact the organization owners through an established private operational channel and identify the affected repository, impact, reproduction conditions, and a safe contact method. Provide only the minimum evidence needed; do not include live credentials, private keys, customer data, or destructive proof-of-concept payloads.
+## Authentication-specific disclosure boundary
 
-## Handling exposed credentials
-
-Treat any credential pasted into chat, logs, commits, issues, pull requests, build artifacts, screenshots, or test fixtures as compromised. Stop using it, revoke or rotate it, replace dependent configuration, and audit recent use. Removing a secret from the latest file does not invalidate it or erase earlier copies. Repository-history rewriting requires exact authorization and coordinated review.
-
-## Supported versions and response expectations
-
-Each repository documents its own supported versions. No service-level response commitment is implied by this fallback policy. Maintainers should acknowledge valid reports privately, limit access, preserve evidence, coordinate remediation, test the fix, rotate affected secrets, and disclose responsibly when appropriate.
-
-Linear planning context: [github.com/shared-auth](https://linear.app/denman/project/githubcomshared-auth-acbca07bb390).
-<!-- ore-org-baseline:end -->
-Do not open a public issue for suspected vulnerabilities, leaked credentials, private data, or customer information. Use GitHub's private vulnerability-reporting channel when it is enabled for the affected repository. Otherwise contact an organization owner through a previously verified private channel and request a secure reporting route.
-
-Include the affected repository and revision, impact, prerequisites, a minimal reproduction, and any proposed remediation. Do not access data beyond what is necessary to demonstrate the issue, disrupt production, persist access, or publish exploit details before maintainers coordinate a fix.
+Do not include real provider tokens, WebAuthn assertions, SSH private keys, GPG private keys, Kerberos tickets, biometric sensor output, user directories, or production session identifiers in a report. Platform WebAuthn may perform local face or fingerprint verification; Shared Auth must never receive or retain raw face images, fingerprint images, biometric templates, or embeddings.
 
 ## Maintainer response
 
-Maintainers should acknowledge the report, create or link a restricted Linear security issue, assess severity and affected versions, coordinate remediation and validation, and publish an advisory when appropriate. Never place secrets or sensitive evidence in public GitHub or public Linear content.
+Maintainers should acknowledge valid reports privately, restrict access, preserve evidence, create or link a restricted Linear security issue, assess affected versions and blast radius, coordinate remediation and exact-source validation, rotate exposed material, and publish a GitHub security advisory or coordinated disclosure when appropriate.
 
-Supported versions and response targets are repository-specific. Repository-local security policies may add stricter requirements and override this fallback where they do not weaken confidentiality or coordinated disclosure.
+Supported versions and response targets are repository-specific. Repository-local policies may add stricter requirements but may not weaken confidentiality, evidence handling, authentication boundaries, or coordinated disclosure.
+
+See [`ORG_SECURITY_BASELINE.md`](ORG_SECURITY_BASELINE.md) for repository, workflow, evidence, secret, and promotion controls.

@@ -1,0 +1,11 @@
+{
+  "schema": "shared-auth/organization-reaudit-summary/v1",
+  "generated_on": "2026-08-19",
+  "repository_count": 13,
+  "finding_count": 83,
+  "blocked_findings": 13,
+  "failed_findings": 70,
+  "workflow_findings": 70,
+  "branch_protection_findings": 13,
+  "state": "failed"
+}
