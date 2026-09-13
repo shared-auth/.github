@@ -93,3 +93,20 @@ This organization policy overrides generic feature-branch and worktree defaults 
 - Put every authorized worktree at `<repository-root>/tmp/worktrees/<name>`; from the repository root, use `./tmp/worktrees/<name>`. Never place worktrees beside repositories or organization directories.
 - Keep `tmp`, `temp`, `tmp/worktrees`, and `temp/worktrees` ignored in the repository-root `.gitignore`. Do not commit files from those directories.
 - Relocate or remove a worktree only when the operator explicitly requests it. Before removal, preserve and publish intended changes, verify its commit is represented on the target branch, and confirm there are no tracked, untracked, ignored-sensitive, or in-use files that must survive. Remove it with `git worktree remove <path>` without `--force`; never delete a worktree directory with `rm`.
+
+<!-- persistence-authority:begin -->
+## Persistence authority (TypeSpec + JSON Schema + Diesel + SeaORM)
+
+Product database contracts are independently authored peer sources in `shared-auth-interfaces`, not in `ORESoftware/k8s-libs-and-shared-defs` or `shared-auth-lib-core`.
+
+Before changing schema, ORM adapters, or migrations, read [`docs/PERSISTENCE_AUTHORITY.md`](docs/PERSISTENCE_AUTHORITY.md).
+
+- **Peer source A:** independently authored persistence TypeSpec in `shared-auth-interfaces`.
+- **Peer source B:** independently authored persistence JSON Schema/OpenAPI in `shared-auth-interfaces`. Neither peer is derived from, subordinate to, or overwritten by the other.
+- **Certified release:** `shared-auth-lib-core` pins both peer sources and owns SQL/catalog/ORM candidates, PostgreSQL extension SQL, parity evidence, and the certified desired-state release. Disagreement blocks release; neither source wins automatically.
+- **Runtime:** Diesel + diesel-async primary and SeaORM DB-first runtime/catalog witness in `shared-auth-orm-core`; runtime libraries do not author a competing schema or hold migration credentials.
+- **Apply:** `shared-auth-infra` alone owns reviewed [declarative-migrations](https://github.com/declarative-migrations) (`dpm`) plan/verify/apply for the pinned `desired.sql`; no DDL at API/web boot.
+- **Fleet plan:** [general-migration-plan](https://linear.app/denman/document/general-migration-plan-f76fadd4cbb2) revision i.
+
+Do not land new product SQL or ORM generation in shared-defs for this org. Keep customer/admin authorization boundaries distinct during the shared-Supabase deployment exception.
+<!-- persistence-authority:end -->
