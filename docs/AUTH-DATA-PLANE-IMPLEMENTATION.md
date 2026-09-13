@@ -7,6 +7,16 @@
 
 This checkpoint records what is merged in Git and what remains a protected operational gate. It is not a production-completion declaration.
 
+## Post-checkpoint federation clarification — 2026-08-20
+
+The merged realm/schema contracts in this checkpoint do not implement the later strict subsystem requirement that a native Shared Auth proof and a parent Supabase proof both be current, independently established, and linked to the same principal.
+
+The current reusable dual-auth guard is an OR/first-success compatibility path, and the current browser handoff is not an atomic strict dual-proof application grant. Declared application, application-account, OAuth-client, consent, and grant tables are schema groundwork until the compiled browser/OIDC runtime enforces them. Existing synthetic federation tests are contract evidence, not deployed end-to-end evidence.
+
+The accepted target is now documented in [Federated dual-proof subsystem authentication](FEDERATED-DUAL-PROOF-ARCHITECTURE.md), with asynchronous state-machine and concurrency assurance defined in [Async authentication state machines and formal verification](ASYNC-AUTH-STATE-MACHINES-AND-FORMAL-VERIFICATION.md). Execution is tracked by [DEN-3810](https://linear.app/denman/issue/DEN-3810/shared-auth-interfaceslib-publish-strict-dual-proof-federation), [DEN-3812](https://linear.app/denman/issue/DEN-3812/shared-auth-formal-methods-verify-strict-dual-proof-authorization), [DEN-2193](https://linear.app/denman/issue/DEN-2193/shared-auth-server-add-realm-isolation-and-federated-customer), [DEN-2194](https://linear.app/denman/issue/DEN-2194/shared-auth-e2e-prove-cross-app-sso-audience-isolation-revocation-and), and [DEN-2197](https://linear.app/denman/issue/DEN-2197/shared-auth-rollout-migrate-consumers-and-remove-authentication).
+
+No OR/race, Supabase-token exchange, handoff, schema-only, or synthetic-test result may be represented as completing that stricter design.
+
 ## Merged implementation evidence
 
 | Workstream | Linear | GitHub evidence | What is now in source |
@@ -62,7 +72,7 @@ This checkpoint makes no claim that any of the following occurred:
 ### DEN-2193 — runtime and schema
 
 1. Run the exact merge revision through Rust format, Clippy, tests, disposable-Postgres schema application, browser WebAuthn, audit, and image build on a functioning runner.
-2. Create reviewed admin/customer deployment overlays only after the new databases and secret mappings exist.
+2. Create reviewed admin/customer deployment overlays only after the new databases and secret mappings exist. Repository-owned configuration follows ignored local `env/enc/*.env.enc` SOPS ciphertext to ignored `env/dec/*.env` plaintext, with the exact profile approved under the organization environment-ownership policy; production values remain authoritative in the protected deployment secret store.
 3. Configure one dedicated Supabase project per realm and exact realm-specific endpoint/key/cookie/issuer values.
 4. Prove customer tokens fail at admin and admin tokens fail at customer.
 5. Prove App A rejects App B tokens and vice versa against the deployed implementation.
@@ -70,7 +80,7 @@ This checkpoint makes no claim that any of the following occurred:
 ### DEN-2194 — evidence
 
 1. Run the exact E2E merge revision on a functioning runner.
-2. Inject disposable realm, App-A/App-B, and pre-revoked-session fixtures through approved secret storage.
+2. Inject disposable realm, App-A/App-B, and pre-revoked-session fixtures through approved secret storage or an approved ignored-local `env/enc/*.env.enc` test profile; never commit, log, or archive either `env/enc/` ciphertext or the corresponding `env/dec/*.env` plaintext.
 3. Record revocation latency, application-RDS auth-query count, connection use, and authentication p95/p99 under load.
 4. Restore admin and customer snapshots independently and record snapshot IDs, timestamps, recovered revision/schema, and verification results.
 5. Perform the reviewed one-realm outage drill and prove the other realm remains healthy.

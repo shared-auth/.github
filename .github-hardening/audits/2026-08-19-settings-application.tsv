@@ -1,0 +1,14 @@
+repository	repository_settings	actions_permissions	vulnerability_alerts	automated_security_fixes
+shared-auth/.github	passed	passed	passed	passed
+shared-auth/shared-auth-server.rs	passed	passed	passed	passed
+shared-auth/shared-auth-lib	passed	passed	passed	passed
+shared-auth/shared-auth-interfaces	passed	passed	passed	passed
+shared-auth/shared-auth-clients	passed	passed	passed	passed
+shared-auth/shared-auth-infra	passed	passed	passed	passed
+shared-auth/shared-auth-mcp-server.rs	passed	passed	passed	passed
+shared-auth/shared-auth-monorepo	passed	passed	passed	passed
+shared-auth/shared-auth.github.io	passed	passed	passed	passed
+shared-auth/shared-auth-e2e	passed	passed	passed	passed
+shared-auth/shared-auth-sync	passed	passed	passed	passed
+shared-auth/shared-auth-nats-bridge.rs	passed	passed	passed	passed
+shared-auth/shared-auth-web-server.js	passed	passed	passed	passed

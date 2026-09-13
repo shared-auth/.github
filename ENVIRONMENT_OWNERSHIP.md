@@ -1,6 +1,15 @@
 # Shared Auth environment ownership
 
-Every repository uses the same SOPS/Nix/Just path contract when it has environment state:
+Every repository uses the same SOPS/Nix/Just path grammar when it has environment state:
+
+```text
+env/enc/*.env.enc
+env/dec/*.env
+```
+
+The `*` is the same reviewed profile basename on both sides. For example, `env/enc/dev.env.enc` decrypts to `env/dec/dev.env`. The wildcard documents the portable naming contract; it is not a blanket allowlist for arbitrary ciphertext files or credential classes.
+
+The current organization baseline configures these exact local profiles:
 
 ```text
 env/enc/dev.env.enc
@@ -9,7 +18,9 @@ env/dec/dev.env
 env/dec/prod.env
 ```
 
-Only the two ciphertext paths may be tracked. `env/dec` is ignored and owner-only. Production secrets remain in the protected deployment store; repository ciphertext is for local/dev/test or explicitly reviewed operator profiles.
+Both `env/enc/` and `env/dec/` are Git-ignored. Encrypted files are local/operator material and must not be force-added; plaintext remains owner-only. The literal organization ignore baseline also contains `*.env`, `**.env`, `**/*.env`, and `**/**/*.env`. Each additional profile still requires a reviewed ownership-matrix entry, an exact `.sops.yaml` creation rule, and matching policy tests before it is used. Production secrets remain authoritative in the protected deployment store; ignored repository-path ciphertext is for local/dev/test or explicitly reviewed operator workflows.
+
+This local path permission does not override repository classification. A `no-secrets` or `references-only` repository remains prohibited from storing credentials even in ignored SOPS ciphertext. Ephemeral user access/refresh tokens, authorization codes, session cookies, OTP/recovery material, and production data are protocol state rather than static environment configuration and must not be placed in either tree.
 
 | Repository | Classification | Allowed secret classes | Rollout |
 |---|---|---|---|

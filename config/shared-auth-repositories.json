@@ -1,0 +1,20 @@
+{
+  "schema": "shared-auth/repository-inventory/v1",
+  "owner": "shared-auth",
+  "default_branch": "main",
+  "repositories": [
+    {"name": ".github", "classification": "public-governance"},
+    {"name": "shared-auth-server.rs", "classification": "identity-authority"},
+    {"name": "shared-auth-lib", "classification": "authorization-library"},
+    {"name": "shared-auth-interfaces", "classification": "contract-library"},
+    {"name": "shared-auth-clients", "classification": "polyglot-clients"},
+    {"name": "shared-auth-infra", "classification": "infrastructure"},
+    {"name": "shared-auth-mcp-server.rs", "classification": "mcp-server"},
+    {"name": "shared-auth-monorepo", "classification": "composition"},
+    {"name": "shared-auth.github.io", "classification": "marketing-pages"},
+    {"name": "shared-auth-e2e", "classification": "end-to-end"},
+    {"name": "shared-auth-sync", "classification": "synchronization"},
+    {"name": "shared-auth-nats-bridge.rs", "classification": "event-bridge"},
+    {"name": "shared-auth-web-server.js", "classification": "administration-dashboard"}
+  ]
+}

@@ -6,15 +6,14 @@ temp/worktrees
 .direnv/
 
 *.env
-*/*.env
-*/**/*.env
+**.env
+**/*.env
+**/**/*.env
 .env.*
 *.env.*
 !.env.example
 /env/dec/
-/env/enc/*
-!/env/enc/dev.env.enc
-!/env/enc/prod.env.enc
+/env/enc/
 
 *.pem
 *.p8

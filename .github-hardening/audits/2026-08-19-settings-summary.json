@@ -1,0 +1,7 @@
+{
+  "schema": "shared-auth/settings-application/v1",
+  "applied_at": "2026-08-19",
+  "publisher": "ORESoftware",
+  "ruleset_status": "unsupported_or_failed",
+  "core_failures": 0
+}
