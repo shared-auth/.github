@@ -88,3 +88,8 @@ Repository-local policy may be stricter—particularly around authentication, au
 
 The public registry withholds private repository names and edges.
 <!-- END MANAGED REPOSITORY RELATIONSHIPS v1 -->
+
+## Shared Auth architecture
+
+- [Canonical identity database and RLS model](docs/CANONICAL-IDENTITY-DATABASE-AND-RLS-MODEL.md) defines provider-owned auth tables, canonical principals, exact provider bindings, root-admin grants, logical sessions/revocation, child authorization boundaries, and RLS semantics.
+- [Provider resource naming and identity topology](docs/PROVIDER-RESOURCE-NAMING-AND-IDENTITY-TOPOLOGY.md) defines `shared-auth` as the logical system while allowing provider resources to be named `shared-auth`, `ores-shared-auth`, or provider-generated IDs. Automation must use reviewed mappings and immutable provider identifiers rather than literal display-name matching.
