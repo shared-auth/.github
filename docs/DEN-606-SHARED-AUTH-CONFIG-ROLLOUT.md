@@ -11,6 +11,28 @@ This document is the organization-level rollout record for the typed Shared Auth
 - The TypeSpec-generated JSON Schema witness, Contract IR, generated language types, runtime adapters and verification receipts are evidence only. They never overwrite either authority or win a disagreement.
 - `ORESoftware/typespec-json-schema-validator` (TJSV) is the fail-closed convergence and promotion gate.
 
+### Reserved-name boundary with fleet topology — 2026-09-14 clarification
+
+A later DEN-2193 topology/orchestration batch accidentally reused `.auth-shared.toml` as a fleet/provider topology filename. The total-context documentation audit found the conflict and corrected it.
+
+The accepted paths are now unambiguous:
+
+```text
+.shared-auth.toml                 canonical consumer policy
+.auth-shared.toml                 migration-only consumer-policy alias
+config/shared-auth-topology.toml  central fleet/provider/application topology
+.cli-flags.toml                   argv/environment flag contract
+config/auth-realms.contract.json  executable realm startup invariants
+```
+
+The topology file is a different contract family. It must never occupy either consumer-policy filename, and the topology validator must reject a reserved policy filename as its input or detect topology-only sections inside either reserved policy file.
+
+Conversely, the fleet topology validator is **not** a third consumer-policy parser. Consumer-policy syntax, enums, provenance, layering and compatibility remain owned by the TypeSpec + authored JSON Schema peer authorities and the reviewed runtime library.
+
+A valid `.shared-auth.toml` or `.auth-shared.toml` file in a repository is not evidence that the executable loads it. Runtime adoption still requires the Workstream B startup/resolution/revision-admission evidence below.
+
+The central `shared-auth-server.rs` currently carries `.auth-shared.toml` as a valid minimal compatibility-policy object after the collision correction, but the central server does not currently claim to load that project consumer policy at runtime. Its topology moved to `config/shared-auth-topology.toml`.
+
 ## Resolution and provenance
 
 Shared Auth owns secure central defaults. A consumer may shadow only explicitly overridable policy fields. Scalars replace scalars and set/array fields replace the corresponding set; there is no implicit union. Unknown keys, unknown enum values, duplicate/empty sets and malformed values fail closed.
@@ -69,6 +91,8 @@ Apply the same startup sequence to the CLI, web server, API server, admin web se
 
 No executable may fall back to an ad-hoc argv parser, direct environment interpretation, an independent Shared Auth TOML parser or permissive defaults after a config error.
 
+`shared-auth-server.rs` fleet/provider topology is not an extra step in this consumer startup sequence. It is operator/admission metadata for the central realm server and is separately validated against the executable realm contract.
+
 ## Workstream C — fleet compliance
 
 The organization-level audit must scan Shared Auth consumers and report, without auto-rewriting policy:
@@ -82,6 +106,8 @@ The organization-level audit must scan Shared Auth consumers and report, without
 - whether executable argv/env handling is the canonical `flags-2-env` boundary and pins a strict-audit-capable revision.
 
 The output should be a deterministic adoption matrix suitable for DEN-2843-style rollout tracking. Contract parsing/enum semantics remain owned by the interface authority and runtime library; the fleet scanner must not become an independent policy parser.
+
+Fleet compliance should also detect **authority collisions**: a reserved consumer-policy filename containing topology-only keys, or topology scanners pointed at a reserved policy filename, is a hard error.
 
 ## Merge evidence rule
 
