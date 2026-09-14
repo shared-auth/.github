@@ -2,23 +2,29 @@
 
 Status: accepted organization policy  
 Decision date: 2026-09-14  
-Tracking: DEN-2193
+Tracking: DEN-2193, DEN-606
 
 ## Decision
 
-Shared Auth uses a three-layer configuration model rather than making one file own unrelated concerns:
+Shared Auth uses distinct configuration authorities rather than making similarly named files own unrelated concerns:
 
-1. organization architecture defines canonical identity and authorization ownership;
-2. `.auth-shared.toml` is the secret-free fleet/provider/application topology contract;
-3. each runtime keeps an executable realm contract plus environment/secret-manager delivery for exact deployment values.
+1. organization architecture defines canonical identity, proof policy, and authorization ownership;
+2. `.shared-auth.toml` is the canonical typed **consumer policy** filename;
+3. `.auth-shared.toml` is only the migration compatibility alias for `.shared-auth.toml` and, when both names exist, consumer-policy tooling fails closed rather than choosing precedence;
+4. `config/shared-auth-topology.toml` is the secret-free fleet/provider/application **topology** contract;
+5. each runtime keeps an executable realm contract plus `.cli-flags.toml` / flags-2-env and protected environment/secret delivery for exact startup values.
 
-The first executable exemplar is `shared-auth/shared-auth-server.rs/.auth-shared.toml`, paired with `config/auth-realms.contract.json`, `.cli-flags.toml`, `src/realm.rs`, and the repository `Procfile`.
+The first topology exemplar is `shared-auth/shared-auth-server.rs/config/shared-auth-topology.toml`, paired with `config/auth-realms.contract.json`, `.cli-flags.toml`, `src/realm.rs`, and the repository `Procfile`.
 
-`.auth-shared.toml` must never become a second secret store or an independent runtime authority that can silently disagree with the server's executable startup contract.
+The topology contract must never be stored in `.shared-auth.toml` or `.auth-shared.toml`. Those names belong to the independently typed consumer-policy family in `shared-auth-interfaces/contracts/shared-auth-config`.
+
+The central server's compatibility-alias file is not evidence that the server runtime already loads the consumer-policy family; DEN-606 runtime adoption remains a separate workstream.
+
+`config/shared-auth-topology.toml` must never become a second secret store or an independent runtime authority that can silently disagree with the server's executable startup contract.
 
 ## Identity ownership
 
-The canonical identity is the opaque `shared_user_id` owned by `shared_auth.principals`. Provider-native authentication stores remain authentication evidence stores:
+The canonical identity is the opaque `shared_user_id` owned by `shared_auth.principals` in the canonical model. Provider-native authentication stores remain authentication evidence stores:
 
 ```text
 Supabase auth.*         ─┐
@@ -62,7 +68,7 @@ A customer credential must not validate as an admin credential, and an admin cre
 
 ## Canonical tables
 
-The cross-provider schema owns these semantic entities:
+The accepted cross-provider model defines these semantic target entities:
 
 - `shared_auth.principals`
 - `shared_auth.provider_identities`
@@ -76,17 +82,17 @@ The cross-provider schema owns these semantic entities:
 - `shared_auth.revocation_outbox`
 - `shared_auth.audit_events`
 
-Provider-native tables are not duplicated into parallel writable canonical user/session tables.
+These names describe target semantics, not proof that every table already exists in the executable production schema. Provider-native tables are not duplicated into parallel independently writable canonical user/session masters.
 
 ## Initial application topology
 
-The first explicit child entries in the server exemplar are:
+The first explicit child entries in the server topology exemplar are:
 
 - `zed-pkg`
 - `sonus-auris`
 - `fiducia-cloud`
 
-The TOML records only non-secret hostnames and environment-variable names for project IDs, Auth endpoints, and audiences. Provider credentials, database URLs, private keys, tokens, and secret values are forbidden.
+The topology TOML records only non-secret hostnames and environment-variable names for project IDs, Auth endpoints, and audiences. Provider credentials, database URLs, private keys, tokens, and secret values are forbidden.
 
 Additional organizations should follow the same model with explicit application keys and provider authority references. Enrollment in Shared Auth does not centralize product authorization.
 
@@ -105,10 +111,11 @@ The DB-less Overmind profile is development-only. Production uses the exact runt
 
 ## Fleet enforcement
 
-`ores-cli` should eventually validate `.auth-shared.toml` across participating repositories. That check should verify at least:
+`ores-cli` should validate `config/shared-auth-topology.toml` across participating repositories. That check should verify at least:
 
-- TOML syntax and schema version;
+- TOML syntax and topology schema/version expectations;
 - no committed secret values;
+- `.shared-auth.toml` / `.auth-shared.toml` are never topology inputs and contain no topology-only sections;
 - canonical provider binding key `(provider, issuer, subject, realm)`;
 - no email/phone/username identity merge policy;
 - exact admin/customer realm separation;
@@ -116,12 +123,17 @@ The DB-less Overmind profile is development-only. Production uses the exact runt
 - application authorization ownership remains product-local;
 - provider revocation is represented as durable canonical work rather than best-effort synchronous cleanup.
 
+Consumer-policy fleet enforcement is a separate DEN-606 concern owned by the TypeSpec + authored Draft 2020-12 JSON Schema peer authorities for `.shared-auth.toml`. The topology linter must not become another parser for that policy family.
+
 The linter should compare authorities, not regenerate one authority from another merely to force textual parity.
 
 ## References
 
+- `AUTH-CONTEXT-PROOF-TAXONOMY-AND-SOURCE-PRECEDENCE.md`
 - `CANONICAL-IDENTITY-DATABASE-AND-RLS-MODEL.md`
 - `FEDERATED-DUAL-PROOF-ARCHITECTURE.md`
-- `shared-auth/shared-auth-server.rs/.auth-shared.toml`
+- `DEN-606-SHARED-AUTH-CONFIG-ROLLOUT.md`
+- `shared-auth/shared-auth-interfaces/contracts/shared-auth-config/README.md`
+- `shared-auth/shared-auth-server.rs/config/shared-auth-topology.toml`
 - `shared-auth/shared-auth-server.rs/docs/runtime-realm-contract.md`
 - `shared-auth/shared-auth-server.rs/docs/auth-shared-topology-and-local-orchestration.md`
