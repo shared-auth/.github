@@ -55,6 +55,11 @@
   "runtime_adoption": {
     "schema": "shared-auth/runtime-adoption/v1",
     "owner": "shared-auth",
+    "policy_schema_version": 1,
+    "compatibility_allowed_keys": [
+      "repository",
+      "commit"
+    ],
     "interfaces_repository": "https://github.com/shared-auth/shared-auth-interfaces",
     "interfaces_revision": "f62d9dbed2db6774dda04586328e6c485423fff6",
     "flags2env_repository": "https://github.com/flags-2-env/flags-2-env",
@@ -73,7 +78,10 @@
     "Rust runtime consumers pin the reviewed strict flags2env revision before policy loading",
     "runtime consumers use the exact reviewed shared-auth-interfaces policy revision",
     "runtime consumers structurally pin the reviewed shared-auth-lib-core revision",
+    "critical Git dependencies are non-optional and may not add branch, tag, or path selectors",
     "Cargo dependency evidence is parsed as TOML and cannot be satisfied by comments or unrelated strings",
+    "every fleet audit binds all repository file reads to one observed default-branch commit SHA",
+    "audit evidence records Git blob SHAs for every inspected repository file",
     "topology authority is explicit and repository-scoped"
   ]
 }
