@@ -32,6 +32,11 @@ jobs:
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: "3.13.7"
+      - name: Unit-test config authority scanner
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest scripts/test_audit_shared_auth_config_authority.py
       - name: Require a least-privilege organization audit credential
         shell: bash
         run: |
@@ -49,6 +54,19 @@ jobs:
             args+=(--soft-fail)
           fi
           python3 scripts/audit-shared-auth-org.py "${args[@]}"
+      - name: Audit Shared Auth config authority across the fleet
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            --manifest config/shared-auth-repositories.json
+            --authority config/shared-auth-config-authority.json
+            --output artifacts/shared-auth-config-authority-audit.json
+          )
+          if [[ "${{ inputs.soft_fail || false }}" == "true" ]]; then
+            args+=(--soft-fail)
+          fi
+          python3 scripts/audit-shared-auth-config-authority.py "${args[@]}"
       - name: Print bounded machine-readable evidence
         if: always()
         shell: bash
@@ -57,4 +75,8 @@ jobs:
           if [[ -f artifacts/shared-auth-org-audit.json ]]; then
             jq '{schema, owner, repository_count, finding_count, state}' \
               artifacts/shared-auth-org-audit.json
+          fi
+          if [[ -f artifacts/shared-auth-config-authority-audit.json ]]; then
+            jq '{schema, authority_schema, owner, repository_count, finding_count, hard_finding_count, warning_count, state}' \
+              artifacts/shared-auth-config-authority-audit.json
           fi
