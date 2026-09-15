@@ -1,13 +1,13 @@
 # Desktop application allocation
 
-Verified **2026-08-06**.
+Verified **2026-09-14**.
 
-Shared Auth requires a paired, native desktop program:
+Shared Auth maintains a paired, native desktop program:
 
-- Rust: [`shared-auth/shared-auth-desktop.rs`](https://github.com/shared-auth/shared-auth-desktop.rs) — **planned**, not yet verified as a published repository.
-- Flutter: [`shared-auth/shared-auth-flutter`](https://github.com/shared-auth/shared-auth-flutter) — **planned**, not yet verified as a published repository.
+- Rust: [`shared-auth/shared-auth-desktop-app.rs`](https://github.com/shared-auth/shared-auth-desktop-app.rs) — repository exists; implementation/release readiness still requires executable platform evidence.
+- Flutter: [`shared-auth/shared-auth-flutter`](https://github.com/shared-auth/shared-auth-flutter) — repository exists; implementation/release readiness still requires executable platform evidence.
 
-Both names are allocation targets, not evidence that the repositories exist. Do not mark either implementation live until the remotes, native builds, packages, tests, signing/update configuration, and supported-platform matrices are verified.
+Repository existence is not evidence that either implementation is production-ready. Do not mark an implementation live until its native builds, packages, tests, signing/update configuration, and supported-platform matrices are verified.
 
 ## Why both Rust and Flutter remain active
 
@@ -15,7 +15,7 @@ The Rust and Flutter applications are first-class side-by-side implementations. 
 
 Every desktop-facing feature must inspect both repositories, share acceptance criteria, route types, OAuth/OIDC fixtures, policy schemas, and release evidence, and normally update both. A one-sided change requires a documented no-change rationale, parity assessment, and follow-up issue. Completion in one repository is not full desktop completion.
 
-Every future `shared-auth-desktop.rs` README, `AGENTS.md`, pull-request template, and `docs/DESKTOP_TOOLKIT.md` must state that Rust and Flutter development proceeds in parallel unless an explicit reviewed exception applies.
+Every `shared-auth-desktop-app.rs` README, `AGENTS.md`, pull-request template, and `docs/DESKTOP_TOOLKIT.md` must state that Rust and Flutter development proceeds in parallel unless an explicit reviewed exception applies.
 
 ## Rust desktop kit: Floem
 
@@ -102,20 +102,20 @@ Both implementations should support semantic parity for:
 
 Shared schemas, policy types, clients, route fixtures, OAuth/OIDC test vectors, synthetic identities, redirect fixtures, and conformance tests must be versioned deliberately.
 
-## Repository creation requirements
+## Repository requirements
 
-Both repositories must start as buildable scaffolds, not placeholders.
+Both repositories must remain buildable scaffolds, not placeholders.
 
 The Rust repository must include:
 
-- `docs/DESKTOP_TOOLKIT.md` with the Floem pin, no-WebView rule, privilege boundary, browser authorization, deep links, platform matrix, and Flutter companion;
+- `docs/DESKTOP_TOOLKIT.md` with the Floem pin policy, no-WebView rule, privilege boundary, browser authorization, deep links, platform matrix, and Flutter companion;
 - a README naming `shared-auth-flutter` and stating that Rust and Flutter features are developed in parallel unless explicitly exempted;
 - `AGENTS.md` and a pull-request template requiring companion inspection and a no-change rationale;
 - native macOS/Windows/Linux CI and package/signing/update skeletons;
 - secure-storage adapters and synthetic OAuth/OIDC test harnesses;
 - deep-link, PKCE, state/nonce, redirect, replay, expiry, recovery, and device/session smoke tests.
 
-The Flutter repository must reciprocally name `shared-auth-desktop.rs`, implement native desktop plus Android/iOS targets deliberately, use the external system browser, and consume the same route and authorization fixtures.
+The Flutter repository must reciprocally name `shared-auth-desktop-app.rs`, implement native desktop plus Android/iOS targets deliberately, use the external system browser, and consume the same route and authorization fixtures.
 
 ## Project routing
 
