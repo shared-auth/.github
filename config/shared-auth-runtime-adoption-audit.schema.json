@@ -38,6 +38,9 @@
         {"type": "null"}
       ]
     },
+    "observedString": {
+      "type": ["string", "null"]
+    },
     "readState": {
       "enum": ["present", "missing", "blocked"]
     },
@@ -66,10 +69,10 @@
         ".auth-shared.toml:blob_sha": {"$ref": "#/$defs/nullableGitSha"},
         "Cargo.toml": {"$ref": "#/$defs/readState"},
         "Cargo.toml:blob_sha": {"$ref": "#/$defs/nullableGitSha"},
-        "policy_repository": {"type": ["string", "null"]},
-        "policy_revision": {"$ref": "#/$defs/nullableGitSha"},
-        "flags2env_revision": {"$ref": "#/$defs/nullableGitSha"},
-        "shared_auth_lib_core_revision": {"$ref": "#/$defs/nullableGitSha"}
+        "policy_repository": {"$ref": "#/$defs/observedString"},
+        "policy_revision": {"$ref": "#/$defs/observedString"},
+        "flags2env_revision": {"$ref": "#/$defs/observedString"},
+        "shared_auth_lib_core_revision": {"$ref": "#/$defs/observedString"}
       }
     },
     "repositoryResult": {
