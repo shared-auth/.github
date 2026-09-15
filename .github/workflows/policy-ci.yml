@@ -38,3 +38,6 @@ jobs:
       - name: Exercise Shared Auth config authority regressions
         shell: bash
         run: python3 -m unittest scripts/test_audit_shared_auth_config_authority.py
+      - name: Exercise Shared Auth runtime adoption regressions
+        shell: bash
+        run: python3 -m unittest scripts/test_audit_shared_auth_runtime_adoption.py
