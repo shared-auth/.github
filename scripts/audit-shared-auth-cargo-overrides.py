@@ -7,6 +7,7 @@ import importlib.util
 import json
 import os
 import sys
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +20,7 @@ spec.loader.exec_module(base)
 CRITICAL = {"flags2env", "shared-auth-lib-core"}
 CARGO_CONFIG_PATHS = (".cargo/config.toml", ".cargo/config")
 DEPENDENCY_TABLES = ("dependencies", "build-dependencies", "dev-dependencies")
+FORBIDDEN_GIT_SELECTORS = ("branch", "tag", "path")
 
 
 def involved_critical(name: str, value: Any) -> str | None:
@@ -39,6 +41,20 @@ def allowed_location(repo_name: str, table: str, name: str, package: str, author
     return False
 
 
+def secure_git_url(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    parsed = urllib.parse.urlparse(value)
+    return (
+        parsed.scheme == "https"
+        and bool(parsed.hostname)
+        and parsed.username is None
+        and parsed.password is None
+        and not parsed.query
+        and not parsed.fragment
+    )
+
+
 def scan_dependency_table(
     repo: str,
     repo_name: str,
@@ -51,12 +67,44 @@ def scan_dependency_table(
     findings: list[dict[str, Any]] = []
     if not isinstance(table, dict):
         return findings
+    location = f"target.{target_scope}.{table_name}" if target_scope is not None else table_name
     for name, value in table.items():
+        if isinstance(value, dict) and "git" in value:
+            git_url = value.get("git")
+            rev = value.get("rev")
+            if not secure_git_url(git_url):
+                findings.append(
+                    base.finding(
+                        repo,
+                        "cargo_override:git_dependency_url",
+                        {"location": location, "name": name, "git": git_url},
+                        "credential-free HTTPS Git URL",
+                    )
+                )
+            if not base.is_sha(rev):
+                findings.append(
+                    base.finding(
+                        repo,
+                        "cargo_override:git_dependency_rev",
+                        {"location": location, "name": name, "rev": rev},
+                        "lowercase 40-character immutable Git revision",
+                    )
+                )
+            for selector in FORBIDDEN_GIT_SELECTORS:
+                if selector in value:
+                    findings.append(
+                        base.finding(
+                            repo,
+                            f"cargo_override:git_dependency_selector:{selector}",
+                            {"location": location, "name": name, selector: value.get(selector)},
+                            "absent",
+                        )
+                    )
+
         package = involved_critical(name, value)
         if package is None:
             continue
         if target_scope is not None or not allowed_location(repo_name, table_name, name, package, authority):
-            location = f"target.{target_scope}.{table_name}" if target_scope is not None else table_name
             findings.append(
                 base.finding(
                     repo,
@@ -92,9 +140,7 @@ def audit_documents(
             if cargo.get("replace"):
                 findings.append(base.finding(repo, "cargo_override:replace", "present", "absent"))
             for table_name in DEPENDENCY_TABLES:
-                findings.extend(
-                    scan_dependency_table(repo, repo_name, table_name, cargo.get(table_name), authority)
-                )
+                findings.extend(scan_dependency_table(repo, repo_name, table_name, cargo.get(table_name), authority))
             targets = cargo.get("target")
             if isinstance(targets, dict):
                 for target_scope, target_table in targets.items():
@@ -164,7 +210,9 @@ def audit_repository(api: Any, owner: str, repo_name: str, authority: dict[str, 
     branch = metadata.get("default_branch")
     if not isinstance(branch, str) or not branch:
         return {"repository": repo, "state": "blocked", "findings": [base.finding(repo, "repository:default_branch", branch, "non-empty branch", "blocked")], "evidence": {}}
-    commit_status, commit_body = api.request(f"/repos/{owner}/{repo_name}/commits/{branch}")
+    commit_status, commit_body = api.request(
+        f"/repos/{owner}/{repo_name}/commits/{urllib.parse.quote(branch, safe='')}"
+    )
     commit_sha = commit_body.get("sha") if isinstance(commit_body, dict) else None
     if commit_status != 200 or not base.is_sha(commit_sha):
         return {"repository": repo, "state": "blocked", "findings": [base.finding(repo, "repository:default_branch_sha", commit_sha or commit_status, "readable commit SHA", "blocked")], "evidence": {"default_branch": branch}}
@@ -192,7 +240,7 @@ def audit_repository(api: Any, owner: str, repo_name: str, authority: dict[str, 
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Audit Shared Auth Cargo source-override bypasses")
+    parser = argparse.ArgumentParser(description="Audit Shared Auth Cargo source-override and Git-pin bypasses")
     parser.add_argument("--authority", default="config/shared-auth-config-authority.json")
     parser.add_argument("--output", default="artifacts/shared-auth-cargo-overrides-audit.json")
     parser.add_argument("--soft-fail", action="store_true")
