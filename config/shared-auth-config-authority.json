@@ -37,6 +37,14 @@
   },
   "runtime": {
     "flags_path": ".cli-flags.toml",
+    "strict_flags2env_revision": "b708a041531a830bd49f030250836896096e7abd",
+    "consumer_repositories": [
+      "shared-auth-cli",
+      "shared-auth-web-server.rs",
+      "shared-auth-api-server.rs",
+      "shared-auth-admin-web-server.rs",
+      "shared-auth-admin-api-server.rs"
+    ],
     "realm_contract_path": "config/auth-realms.contract.json",
     "realm_contract_repositories": [
       "shared-auth-server.rs"
@@ -47,6 +55,8 @@
     "fleet topology never becomes a secret store or argv parser",
     "the presence of a policy file is not proof that a runtime loads it",
     "canonical and compatibility policy filenames may not coexist",
+    "intended runtime consumers carry the canonical policy overlay and canonical flags contract",
+    "Rust runtime consumers pin the reviewed strict flags2env revision before policy loading",
     "topology authority is explicit and repository-scoped"
   ]
 }
