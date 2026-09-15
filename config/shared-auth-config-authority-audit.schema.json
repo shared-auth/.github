@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shared-auth.github.io/schemas/config-authority-audit-v1.schema.json",
+  "title": "Shared Auth config authority audit v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "authority_schema",
+    "owner",
+    "repository_count",
+    "finding_count",
+    "hard_finding_count",
+    "warning_count",
+    "state",
+    "repositories"
+  ],
+  "properties": {
+    "schema": {"const": "shared-auth/config-authority-audit/v1"},
+    "authority_schema": {"const": "shared-auth/config-authority/v1"},
+    "owner": {"type": "string", "minLength": 1},
+    "repository_count": {"type": "integer", "minimum": 0},
+    "finding_count": {"type": "integer", "minimum": 0},
+    "hard_finding_count": {"type": "integer", "minimum": 0},
+    "warning_count": {"type": "integer", "minimum": 0},
+    "state": {"enum": ["passed", "warning", "failed"]},
+    "repositories": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/repositoryResult"}
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "required": ["repository", "control", "state"],
+      "properties": {
+        "repository": {"type": "string"},
+        "control": {"type": "string"},
+        "state": {"enum": ["failed", "warning", "blocked"]},
+        "actual": {},
+        "expected": {},
+        "http_status": {"type": "integer"},
+        "detail": {}
+      },
+      "additionalProperties": false
+    },
+    "repositoryResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "state", "findings", "evidence"],
+      "properties": {
+        "repository": {"type": "string"},
+        "state": {"enum": ["passed", "warning", "failed", "blocked"]},
+        "findings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/finding"}
+        },
+        "evidence": {"type": "object"}
+      }
+    }
+  }
+}
