@@ -117,6 +117,20 @@ class CargoOverrideTests(unittest.TestCase):
         cargo = VALID_CARGO + f'''\n[target.'cfg(unix)'.dependencies]\nores-otel-web = {{ git = "https://github.com/ores-otel/ores.otel.log", rev = "{'a'*40}" }}\n'''
         self.assertNotIn("cargo_override:git_dependency_rev", controls(audit(cargo=cargo)))
 
+    def test_18_workspace_git_dependency_requires_immutable_rev(self):
+        cargo = VALID_CARGO + '''\n[workspace.dependencies]\nworkspace-helper = { git = "https://github.com/example/workspace-helper", branch = "main" }\n'''
+        found = controls(audit(cargo=cargo))
+        self.assertIn("cargo_override:git_dependency_rev", found)
+        self.assertIn("cargo_override:git_dependency_selector:branch", found)
+
+    def test_19_workspace_critical_dependency_is_not_a_canonical_slot(self):
+        cargo = VALID_CARGO + f'''\n[workspace.dependencies]\nflags2env = {{ git = "https://github.com/flags-2-env/flags-2-env", rev = "{FLAGS_REV}" }}\n'''
+        self.assertIn("cargo_override:critical_redeclaration", controls(audit(cargo=cargo)))
+
+    def test_20_workspace_noncritical_git_dependency_is_allowed_when_immutable(self):
+        cargo = VALID_CARGO + f'''\n[workspace.dependencies]\nworkspace-helper = {{ git = "https://github.com/example/workspace-helper", rev = "{'f'*40}" }}\n'''
+        self.assertEqual(audit(cargo=cargo)["state"], "passed")
+
 
 if __name__ == "__main__":
     unittest.main()
