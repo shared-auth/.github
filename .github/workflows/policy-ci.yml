@@ -41,3 +41,6 @@ jobs:
       - name: Exercise Shared Auth runtime adoption regressions
         shell: bash
         run: python3 -m unittest scripts/test_audit_shared_auth_runtime_adoption.py
+      - name: Exercise Shared Auth Cargo override regressions
+        shell: bash
+        run: python3 -m unittest scripts/test_audit_shared_auth_cargo_overrides.py
