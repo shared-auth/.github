@@ -2,8 +2,6 @@
 from __future__ import annotations
 
 import importlib.util
-import json
-import tempfile
 import unittest
 from pathlib import Path
 
@@ -12,6 +10,9 @@ spec = importlib.util.spec_from_file_location("shared_auth_config_authority", SC
 assert spec and spec.loader
 scanner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(scanner)
+
+STRICT_FLAGS_REV = "b708a041531a830bd49f030250836896096e7abd"
+RUNTIME_CONSUMER = "shared-auth-web-server.rs"
 
 AUTHORITY = {
     "schema": "shared-auth/config-authority/v1",
@@ -32,6 +33,8 @@ AUTHORITY = {
     },
     "runtime": {
         "flags_path": ".cli-flags.toml",
+        "strict_flags2env_revision": STRICT_FLAGS_REV,
+        "consumer_repositories": [RUNTIME_CONSUMER],
         "realm_contract_path": "config/auth-realms.contract.json",
         "realm_contract_repositories": ["shared-auth-server.rs"],
     },
@@ -42,6 +45,19 @@ VALID_POLICY = '''schema_version = 1
 [compatibility]
 repository = "https://github.com/shared-auth/shared-auth-interfaces"
 commit = "0123456789abcdef0123456789abcdef01234567"
+'''
+
+VALID_FLAGS = '''[parse]
+allow_unknown = false
+[env]
+load = false
+'''
+
+VALID_CARGO = f'''[package]
+name = "fixture"
+version = "0.1.0"
+[dependencies]
+flags2env = {{ git = "https://github.com/flags-2-env/flags-2-env", rev = "{STRICT_FLAGS_REV}" }}
 '''
 
 VALID_TOPOLOGY = '''[contract]
@@ -87,7 +103,7 @@ class ConfigAuthorityTests(unittest.TestCase):
     def controls(self, report):
         return {item["control"] for item in report["findings"]}
 
-    def test_no_files_is_structurally_valid(self):
+    def test_no_files_is_structurally_valid_for_nonconsumer(self):
         self.assertEqual(audit("shared-auth-lib", {})["state"], "passed")
 
     def test_canonical_policy_is_valid(self):
@@ -138,6 +154,29 @@ repository = "https://github.com/shared-auth/shared-auth-interfaces"
     def test_runtime_realm_contract_allowed_on_server(self):
         report = audit("shared-auth-server.rs", {"config/auth-realms.contract.json": "{}"})
         self.assertNotIn("config/auth-realms.contract.json:owner", self.controls(report))
+
+    def test_runtime_consumer_requires_canonical_policy(self):
+        report = audit(RUNTIME_CONSUMER, {".cli-flags.toml": VALID_FLAGS, "Cargo.toml": VALID_CARGO})
+        self.assertIn("consumer_policy:canonical_required", self.controls(report))
+
+    def test_runtime_consumer_requires_flags_contract(self):
+        report = audit(RUNTIME_CONSUMER, {".shared-auth.toml": VALID_POLICY, "Cargo.toml": VALID_CARGO})
+        self.assertIn("runtime:flags_required", self.controls(report))
+
+    def test_runtime_consumer_requires_strict_flags_revision(self):
+        stale = VALID_CARGO.replace(STRICT_FLAGS_REV, "d7bad9ea7dfc657653368237e08903514cdca1ec")
+        report = audit(
+            RUNTIME_CONSUMER,
+            {".shared-auth.toml": VALID_POLICY, ".cli-flags.toml": VALID_FLAGS, "Cargo.toml": stale},
+        )
+        self.assertIn("runtime:strict_flags2env_revision", self.controls(report))
+
+    def test_runtime_consumer_baseline_passes(self):
+        report = audit(
+            RUNTIME_CONSUMER,
+            {".shared-auth.toml": VALID_POLICY, ".cli-flags.toml": VALID_FLAGS, "Cargo.toml": VALID_CARGO},
+        )
+        self.assertEqual(report["state"], "passed")
 
 
 if __name__ == "__main__":
