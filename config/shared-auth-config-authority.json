@@ -1,0 +1,52 @@
+{
+  "schema": "shared-auth/config-authority/v1",
+  "consumer_policy": {
+    "canonical_path": ".shared-auth.toml",
+    "compatibility_aliases": [
+      ".auth-shared.toml"
+    ],
+    "fail_if_multiple_present": true,
+    "allowed_top_level_sections": [
+      "schema_version",
+      "compatibility",
+      "factors",
+      "pages",
+      "styling"
+    ],
+    "required_top_level_sections": [
+      "schema_version",
+      "compatibility"
+    ],
+    "legacy_alias_state": "warning"
+  },
+  "fleet_topology": {
+    "canonical_path": "config/shared-auth-topology.toml",
+    "allowed_repositories": [
+      "shared-auth-server.rs"
+    ],
+    "topology_only_sections": [
+      "contract",
+      "identity",
+      "canonical_tables",
+      "realms",
+      "providers",
+      "revocation",
+      "root_admin",
+      "applications"
+    ]
+  },
+  "runtime": {
+    "flags_path": ".cli-flags.toml",
+    "realm_contract_path": "config/auth-realms.contract.json",
+    "realm_contract_repositories": [
+      "shared-auth-server.rs"
+    ]
+  },
+  "invariants": [
+    "consumer policy filenames never own fleet topology",
+    "fleet topology never becomes a secret store or argv parser",
+    "the presence of a policy file is not proof that a runtime loads it",
+    "canonical and compatibility policy filenames may not coexist",
+    "topology authority is explicit and repository-scoped"
+  ]
+}
