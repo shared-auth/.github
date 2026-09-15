@@ -28,6 +28,22 @@
     }
   },
   "$defs": {
+    "gitSha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "nullableGitSha": {
+      "anyOf": [
+        {"$ref": "#/$defs/gitSha"},
+        {"type": "null"}
+      ]
+    },
+    "observedString": {
+      "type": ["string", "null"]
+    },
+    "readState": {
+      "enum": ["present", "missing", "blocked"]
+    },
     "finding": {
       "type": "object",
       "additionalProperties": false,
@@ -38,6 +54,25 @@
         "state": {"enum": ["failed", "blocked"]},
         "actual": {},
         "expected": {}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "runtime_consumer": {"type": "boolean"},
+        "default_branch": {"type": "string", "minLength": 1},
+        "default_branch_sha": {"$ref": "#/$defs/gitSha"},
+        ".shared-auth.toml": {"$ref": "#/$defs/readState"},
+        ".shared-auth.toml:blob_sha": {"$ref": "#/$defs/nullableGitSha"},
+        ".auth-shared.toml": {"$ref": "#/$defs/readState"},
+        ".auth-shared.toml:blob_sha": {"$ref": "#/$defs/nullableGitSha"},
+        "Cargo.toml": {"$ref": "#/$defs/readState"},
+        "Cargo.toml:blob_sha": {"$ref": "#/$defs/nullableGitSha"},
+        "policy_repository": {"$ref": "#/$defs/observedString"},
+        "policy_revision": {"$ref": "#/$defs/observedString"},
+        "flags2env_revision": {"$ref": "#/$defs/observedString"},
+        "shared_auth_lib_core_revision": {"$ref": "#/$defs/observedString"}
       }
     },
     "repositoryResult": {
@@ -51,7 +86,7 @@
           "type": "array",
           "items": {"$ref": "#/$defs/finding"}
         },
-        "evidence": {"type": "object"}
+        "evidence": {"$ref": "#/$defs/evidence"}
       }
     }
   }

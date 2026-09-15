@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import base64
 import importlib.util
 import unittest
 from pathlib import Path
@@ -19,6 +20,10 @@ CLI = "shared-auth-cli"
 
 AUTHORITY = {
     "schema": "shared-auth/config-authority/v1",
+    "consumer_policy": {
+        "allowed_top_level_sections": ["schema_version", "compatibility", "factors", "pages", "styling"],
+        "required_top_level_sections": ["schema_version", "compatibility"],
+    },
     "runtime": {
         "policy_path": ".shared-auth.toml",
         "legacy_policy_path": ".auth-shared.toml",
@@ -28,6 +33,8 @@ AUTHORITY = {
     "runtime_adoption": {
         "schema": "shared-auth/runtime-adoption/v1",
         "owner": "shared-auth",
+        "policy_schema_version": 1,
+        "compatibility_allowed_keys": ["repository", "commit"],
         "interfaces_repository": "https://github.com/shared-auth/shared-auth-interfaces",
         "interfaces_revision": POLICY_REV,
         "flags2env_repository": "https://github.com/flags-2-env/flags-2-env",
@@ -54,12 +61,53 @@ shared-auth-lib-core = {{ git = "https://github.com/shared-auth/shared-auth-lib-
 CLI_CARGO = VALID_CARGO + f'''\n[build-dependencies]\nflags2env = {{ git = "https://github.com/flags-2-env/flags-2-env", rev = "{FLAGS_REV}" }}\n'''
 
 
-def audit(policy=VALID_POLICY, cargo=VALID_CARGO, repo=RUNTIME, alias=False):
-    return scanner.audit_documents(repo, policy, cargo, AUTHORITY, alias_present=alias)
+def clone_authority():
+    import copy
+
+    return copy.deepcopy(AUTHORITY)
+
+
+def audit(policy=VALID_POLICY, cargo=VALID_CARGO, repo=RUNTIME, alias=False, authority=None):
+    return scanner.audit_documents(repo, policy, cargo, authority or AUTHORITY, alias_present=alias)
 
 
 def controls(report):
     return {item["control"] for item in report["findings"]}
+
+
+class FakeAPI:
+    def __init__(self, *, archived=False, disabled=False, commit_status=200):
+        self.paths: list[str] = []
+        self.commit_sha = "e" * 40
+        self.archived = archived
+        self.disabled = disabled
+        self.commit_status = commit_status
+
+    @staticmethod
+    def encoded(text: str, blob: str):
+        return {
+            "encoding": "base64",
+            "content": base64.b64encode(text.encode()).decode(),
+            "sha": blob,
+        }
+
+    def request(self, path: str):
+        self.paths.append(path)
+        prefix = f"/repos/shared-auth/{RUNTIME}"
+        if path == prefix:
+            return 200, {"default_branch": "main", "archived": self.archived, "disabled": self.disabled}
+        if path == f"{prefix}/commits/main":
+            if self.commit_status != 200:
+                return self.commit_status, None
+            return 200, {"sha": self.commit_sha}
+        ref = f"?ref={self.commit_sha}"
+        if path == f"{prefix}/contents/.shared-auth.toml{ref}":
+            return 200, self.encoded(VALID_POLICY, "a" * 40)
+        if path == f"{prefix}/contents/.auth-shared.toml{ref}":
+            return 404, {"message": "Not Found"}
+        if path == f"{prefix}/contents/Cargo.toml{ref}":
+            return 200, self.encoded(VALID_CARGO, "b" * 40)
+        return 500, {"message": "unexpected fake request"}
 
 
 class RuntimeAdoptionTests(unittest.TestCase):
@@ -85,7 +133,9 @@ class RuntimeAdoptionTests(unittest.TestCase):
 
     def test_07_policy_range_is_not_accepted_for_runtime(self):
         policy = f'''schema_version = 1\n[compatibility]\nrepository = "https://github.com/shared-auth/shared-auth-interfaces"\nrange = {{ base = "{'a'*40}", head = "{'b'*40}" }}\n'''
-        self.assertIn("runtime_policy:exact_revision_required", controls(audit(policy=policy)))
+        found = controls(audit(policy=policy))
+        self.assertIn("runtime_policy:exact_revision_required", found)
+        self.assertIn("runtime_policy:compatibility_unknown_keys", found)
 
     def test_08_wrong_interfaces_repository_fails(self):
         wrong = VALID_POLICY.replace("shared-auth/shared-auth-interfaces", "example/other")
@@ -122,6 +172,71 @@ class RuntimeAdoptionTests(unittest.TestCase):
         report = audit(cargo=cargo)
         self.assertIn("Cargo.toml:toml", controls(report))
         self.assertEqual(report["state"], "failed")
+
+    def test_16_policy_schema_version_is_exact(self):
+        policy = VALID_POLICY.replace("schema_version = 1", "schema_version = 2")
+        self.assertIn("runtime_policy:schema_version", controls(audit(policy=policy)))
+
+    def test_17_unknown_policy_top_level_is_rejected(self):
+        policy = VALID_POLICY + "\n[unexpected]\nenabled = true\n"
+        self.assertIn("runtime_policy:unknown_top_level", controls(audit(policy=policy)))
+
+    def test_18_optional_critical_dependency_is_rejected(self):
+        cargo = VALID_CARGO.replace(
+            f'rev = "{FLAGS_REV}" }}', f'rev = "{FLAGS_REV}", optional = true }}', 1
+        )
+        self.assertIn("runtime_cargo:flags2env:optional", controls(audit(cargo=cargo)))
+
+    def test_19_extra_git_selector_is_rejected(self):
+        cargo = VALID_CARGO.replace(
+            f'rev = "{LIB_REV}" }}', f'rev = "{LIB_REV}", branch = "main" }}'
+        )
+        self.assertIn("runtime_cargo:shared_auth_lib_core:selector:branch", controls(audit(cargo=cargo)))
+
+    def test_20_wrong_package_alias_is_rejected(self):
+        cargo = VALID_CARGO.replace(
+            f'rev = "{LIB_REV}" }}', f'rev = "{LIB_REV}", package = "other-core" }}'
+        )
+        self.assertIn("runtime_cargo:shared_auth_lib_core:package", controls(audit(cargo=cargo)))
+
+    def test_21_authority_rejects_duplicate_runtime_consumers(self):
+        authority = clone_authority()
+        authority["runtime"]["consumer_repositories"].append(RUNTIME)
+        errors = scanner.validate_authority(authority)
+        self.assertTrue(any("duplicates" in error for error in errors))
+
+    def test_22_authority_rejects_non_sha_revision(self):
+        authority = clone_authority()
+        authority["runtime_adoption"]["interfaces_revision"] = "main"
+        errors = scanner.validate_authority(authority)
+        self.assertTrue(any("interfaces_revision" in error for error in errors))
+
+    def test_23_authority_rejects_build_dependency_repo_outside_consumers(self):
+        authority = clone_authority()
+        authority["runtime_adoption"]["flags2env_build_dependency_repositories"] = ["not-a-consumer"]
+        errors = scanner.validate_authority(authority)
+        self.assertTrue(any("subset" in error for error in errors))
+
+    def test_24_repository_audit_pins_every_file_read_to_one_commit(self):
+        api = FakeAPI()
+        report = scanner.audit_repository(api, "shared-auth", RUNTIME, AUTHORITY)
+        self.assertEqual(report["state"], "passed")
+        self.assertEqual(report["evidence"]["default_branch_sha"], api.commit_sha)
+        self.assertEqual(report["evidence"][".shared-auth.toml:blob_sha"], "a" * 40)
+        self.assertEqual(report["evidence"]["Cargo.toml:blob_sha"], "b" * 40)
+        content_paths = [path for path in api.paths if "/contents/" in path]
+        self.assertEqual(len(content_paths), 3)
+        self.assertTrue(all(path.endswith(f"?ref={api.commit_sha}") for path in content_paths))
+
+    def test_25_archived_repository_is_failed_even_when_evidence_is_readable(self):
+        report = scanner.audit_repository(FakeAPI(archived=True), "shared-auth", RUNTIME, AUTHORITY)
+        self.assertEqual(report["state"], "failed")
+        self.assertIn("repository:archived", controls(report))
+
+    def test_26_unreadable_branch_sha_is_blocked(self):
+        report = scanner.audit_repository(FakeAPI(commit_status=503), "shared-auth", RUNTIME, AUTHORITY)
+        self.assertEqual(report["state"], "blocked")
+        self.assertIn("repository:default_branch_sha", controls(report))
 
 
 if __name__ == "__main__":
