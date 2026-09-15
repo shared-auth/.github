@@ -25,9 +25,16 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.13.7"
       - name: Validate policy, workflow pins, conflict markers, and credential patterns
         shell: bash
         run: bash scripts/validate-agent-policy.sh
       - name: Exercise fail-closed validator fixtures
         shell: bash
         run: bash tests/agent-policy-validator.sh
+      - name: Exercise Shared Auth config authority regressions
+        shell: bash
+        run: python3 -m unittest scripts/test_audit_shared_auth_config_authority.py
