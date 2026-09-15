@@ -235,6 +235,8 @@ def audit_repository(
     evidence["default_branch"] = branch
 
     policy = authority["consumer_policy"]
+    runtime = authority["runtime"]
+    runtime_consumers = set(runtime.get("consumer_repositories", []))
     canonical = policy["canonical_path"]
     aliases = list(policy["compatibility_aliases"])
     policy_paths = [canonical, *aliases]
@@ -259,8 +261,36 @@ def audit_repository(
             result(repo, "consumer_policy:legacy_alias", state, present_policy_paths[0], canonical)
         )
 
+    if repo_name in runtime_consumers and canonical not in policy_docs:
+        findings.append(
+            result(repo, "consumer_policy:canonical_required", "failed", present_policy_paths, canonical)
+        )
+
     for path, text in policy_docs.items():
         findings.extend(audit_policy_document(repo, path, text, authority))
+
+    if repo_name in runtime_consumers:
+        flags_path = str(runtime["flags_path"])
+        flags_state, flags_text, flags_error = fetch_text(api, owner, repo_name, branch, flags_path)
+        evidence[flags_path] = flags_state
+        if flags_state == "missing":
+            findings.append(result(repo, "runtime:flags_required", "failed", "missing", flags_path))
+        elif flags_state == "blocked" and flags_error is not None:
+            findings.append(blocked(repo, f"{flags_path}:read", int(flags_error["status"]), flags_error["body"]))
+        elif flags_text is not None:
+            _, parse_findings = parse_toml(repo, flags_path, flags_text)
+            findings.extend(parse_findings)
+
+        cargo_state, cargo_text, cargo_error = fetch_text(api, owner, repo_name, branch, "Cargo.toml")
+        evidence["Cargo.toml"] = cargo_state
+        if cargo_state == "blocked" and cargo_error is not None:
+            findings.append(blocked(repo, "Cargo.toml:read", int(cargo_error["status"]), cargo_error["body"]))
+        elif cargo_state == "present" and cargo_text is not None:
+            strict_rev = str(runtime["strict_flags2env_revision"])
+            if "flags2env" not in cargo_text or strict_rev not in cargo_text:
+                findings.append(
+                    result(repo, "runtime:strict_flags2env_revision", "failed", "not pinned", strict_rev)
+                )
 
     topology_path = authority["fleet_topology"]["canonical_path"]
     topology_state, topology_text, topology_error = fetch_text(api, owner, repo_name, branch, topology_path)
@@ -270,17 +300,17 @@ def audit_repository(
     elif topology_state == "blocked" and topology_error is not None:
         findings.append(blocked(repo, f"{topology_path}:read", int(topology_error["status"]), topology_error["body"]))
 
-    realm_path = authority["runtime"]["realm_contract_path"]
+    realm_path = runtime["realm_contract_path"]
     realm_state, _, realm_error = fetch_text(api, owner, repo_name, branch, realm_path)
     evidence[realm_path] = realm_state
-    if realm_state == "present" and repo_name not in set(authority["runtime"]["realm_contract_repositories"]):
+    if realm_state == "present" and repo_name not in set(runtime["realm_contract_repositories"]):
         findings.append(
             result(
                 repo,
                 f"{realm_path}:owner",
                 "failed",
                 repo_name,
-                sorted(authority["runtime"]["realm_contract_repositories"]),
+                sorted(runtime["realm_contract_repositories"]),
             )
         )
     elif realm_state == "blocked" and realm_error is not None:
