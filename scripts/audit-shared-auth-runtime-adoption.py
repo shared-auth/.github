@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import argparse
 import base64
+import binascii
 import json
 import os
+import re
 import sys
 import tomllib
 import urllib.error
@@ -21,6 +23,8 @@ from pathlib import Path
 from typing import Any
 
 API = "https://api.github.com"
+REPO_COMPONENT = re.compile(r"^[A-Za-z0-9_.-]+$")
+FORBIDDEN_GIT_SELECTORS = ("branch", "tag", "path")
 
 
 def finding(repo: str, control: str, actual: Any, expected: Any, state: str = "failed") -> dict[str, Any]:
@@ -35,6 +39,26 @@ def finding(repo: str, control: str, actual: Any, expected: Any, state: str = "f
 
 def is_sha(value: Any) -> bool:
     return isinstance(value, str) and len(value) == 40 and all(c in "0123456789abcdef" for c in value)
+
+
+def is_repo_component(value: Any) -> bool:
+    return isinstance(value, str) and bool(REPO_COMPONENT.fullmatch(value))
+
+
+def is_https_github_repository(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    parsed = urllib.parse.urlparse(value)
+    parts = [part for part in parsed.path.split("/") if part]
+    return (
+        parsed.scheme == "https"
+        and parsed.netloc == "github.com"
+        and not parsed.params
+        and not parsed.query
+        and not parsed.fragment
+        and len(parts) == 2
+        and all(is_repo_component(part.removesuffix(".git")) for part in parts)
+    )
 
 
 def parse_toml(repo: str, path: str, text: str) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
@@ -56,6 +80,7 @@ def check_git_dependency(
     dep: dict[str, Any] | None,
     expected_git: str,
     expected_rev: str,
+    expected_package: str,
 ) -> list[dict[str, Any]]:
     results: list[dict[str, Any]] = []
     if dep is None:
@@ -64,7 +89,83 @@ def check_git_dependency(
         results.append(finding(repo, f"{control_prefix}:git", dep.get("git"), expected_git))
     if dep.get("rev") != expected_rev:
         results.append(finding(repo, f"{control_prefix}:rev", dep.get("rev"), expected_rev))
+    if dep.get("optional") is True:
+        results.append(finding(repo, f"{control_prefix}:optional", True, False))
+    package = dep.get("package")
+    if package is not None and package != expected_package:
+        results.append(finding(repo, f"{control_prefix}:package", package, expected_package))
+    for selector in FORBIDDEN_GIT_SELECTORS:
+        if selector in dep:
+            results.append(finding(repo, f"{control_prefix}:selector:{selector}", dep.get(selector), "absent"))
     return results
+
+
+def validate_authority(authority: Any) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(authority, dict):
+        return ["authority must be a JSON object"]
+    if authority.get("schema") != "shared-auth/config-authority/v1":
+        errors.append("authority.schema must be shared-auth/config-authority/v1")
+
+    runtime = authority.get("runtime")
+    adoption = authority.get("runtime_adoption")
+    consumer_policy = authority.get("consumer_policy")
+    if not isinstance(runtime, dict):
+        errors.append("runtime must be an object")
+        return errors
+    if not isinstance(adoption, dict) or adoption.get("schema") != "shared-auth/runtime-adoption/v1":
+        errors.append("runtime_adoption must use shared-auth/runtime-adoption/v1")
+        return errors
+    if not isinstance(consumer_policy, dict):
+        errors.append("consumer_policy must be an object")
+
+    owner = adoption.get("owner")
+    if not is_repo_component(owner):
+        errors.append("runtime_adoption.owner must be a safe GitHub owner component")
+
+    consumers = runtime.get("consumer_repositories")
+    if not isinstance(consumers, list) or not consumers:
+        errors.append("runtime.consumer_repositories must be a non-empty array")
+        consumers = []
+    elif any(not is_repo_component(repo) for repo in consumers):
+        errors.append("runtime.consumer_repositories entries must be safe GitHub repository names")
+    if len(set(consumers)) != len(consumers):
+        errors.append("runtime.consumer_repositories must not contain duplicates")
+
+    build_consumers = adoption.get("flags2env_build_dependency_repositories", [])
+    if not isinstance(build_consumers, list) or any(not is_repo_component(repo) for repo in build_consumers):
+        errors.append("runtime_adoption.flags2env_build_dependency_repositories must be repository names")
+        build_consumers = []
+    if len(set(build_consumers)) != len(build_consumers):
+        errors.append("runtime_adoption.flags2env_build_dependency_repositories must not contain duplicates")
+    if not set(build_consumers).issubset(set(consumers)):
+        errors.append("build-dependency repositories must be a subset of runtime consumers")
+
+    if adoption.get("policy_schema_version") != 1:
+        errors.append("runtime_adoption.policy_schema_version must be 1")
+    compatibility_keys = adoption.get("compatibility_allowed_keys")
+    if compatibility_keys != ["repository", "commit"]:
+        errors.append("runtime_adoption.compatibility_allowed_keys must be [repository, commit]")
+
+    for key, value in {
+        "runtime.strict_flags2env_revision": runtime.get("strict_flags2env_revision"),
+        "runtime_adoption.interfaces_revision": adoption.get("interfaces_revision"),
+        "runtime_adoption.shared_auth_lib_core_revision": adoption.get("shared_auth_lib_core_revision"),
+    }.items():
+        if not is_sha(value):
+            errors.append(f"{key} must be a lowercase 40-character Git SHA")
+
+    for key in ("interfaces_repository", "flags2env_repository", "shared_auth_lib_core_repository"):
+        if not is_https_github_repository(adoption.get(key)):
+            errors.append(f"runtime_adoption.{key} must be an exact https://github.com/owner/repository URL")
+
+    for key in ("policy_path", "legacy_policy_path"):
+        value = runtime.get(key)
+        if not isinstance(value, str) or not value or value.startswith("/") or ".." in Path(value).parts:
+            errors.append(f"runtime.{key} must be a repository-relative path")
+    if runtime.get("policy_path") == runtime.get("legacy_policy_path"):
+        errors.append("runtime policy and legacy policy paths must differ")
+    return errors
 
 
 def audit_documents(
@@ -77,7 +178,8 @@ def audit_documents(
 ) -> dict[str, Any]:
     runtime = authority["runtime"]
     adoption = authority["runtime_adoption"]
-    owner = adoption.get("owner", "shared-auth")
+    consumer_policy = authority.get("consumer_policy", {})
+    owner = adoption["owner"]
     repo = f"{owner}/{repo_name}"
     results: list[dict[str, Any]] = []
     evidence: dict[str, Any] = {}
@@ -92,6 +194,21 @@ def audit_documents(
         policy, parse_results = parse_toml(repo, runtime["policy_path"], policy_text)
         results.extend(parse_results)
         if policy is not None:
+            expected_schema_version = adoption["policy_schema_version"]
+            if policy.get("schema_version") != expected_schema_version:
+                results.append(
+                    finding(repo, "runtime_policy:schema_version", policy.get("schema_version"), expected_schema_version)
+                )
+            allowed_top = set(consumer_policy.get("allowed_top_level_sections", []))
+            required_top = set(consumer_policy.get("required_top_level_sections", []))
+            if allowed_top:
+                unknown_top = sorted(set(policy) - allowed_top)
+                if unknown_top:
+                    results.append(finding(repo, "runtime_policy:unknown_top_level", unknown_top, sorted(allowed_top)))
+            missing_top = sorted(required_top - set(policy))
+            if missing_top:
+                results.append(finding(repo, "runtime_policy:missing_top_level", missing_top, sorted(required_top)))
+
             compatibility = policy.get("compatibility")
             if not isinstance(compatibility, dict):
                 results.append(finding(repo, "runtime_policy:compatibility", compatibility, "table"))
@@ -100,14 +217,18 @@ def audit_documents(
                 expected_rev = adoption["interfaces_revision"]
                 evidence["policy_repository"] = compatibility.get("repository")
                 evidence["policy_revision"] = compatibility.get("commit")
+                allowed_compat = set(adoption["compatibility_allowed_keys"])
+                unknown_compat = sorted(set(compatibility) - allowed_compat)
+                if unknown_compat:
+                    results.append(
+                        finding(repo, "runtime_policy:compatibility_unknown_keys", unknown_compat, sorted(allowed_compat))
+                    )
                 if compatibility.get("repository") != expected_repo:
                     results.append(
                         finding(repo, "runtime_policy:interfaces_repository", compatibility.get("repository"), expected_repo)
                     )
                 if "range" in compatibility:
-                    results.append(
-                        finding(repo, "runtime_policy:exact_revision_required", "range", expected_rev)
-                    )
+                    results.append(finding(repo, "runtime_policy:exact_revision_required", "range", expected_rev))
                 commit = compatibility.get("commit")
                 if not is_sha(commit):
                     results.append(finding(repo, "runtime_policy:revision_shape", commit, "lowercase 40-char Git SHA"))
@@ -116,7 +237,12 @@ def audit_documents(
 
     if alias_present:
         results.append(
-            finding(repo, "runtime_policy:filename_collision", [runtime["policy_path"], runtime["legacy_policy_path"]], runtime["policy_path"])
+            finding(
+                repo,
+                "runtime_policy:filename_collision",
+                [runtime["policy_path"], runtime["legacy_policy_path"]],
+                runtime["policy_path"],
+            )
         )
 
     if cargo_text is None:
@@ -136,6 +262,7 @@ def audit_documents(
                     flags,
                     adoption["flags2env_repository"],
                     runtime["strict_flags2env_revision"],
+                    "flags2env",
                 )
             )
             results.extend(
@@ -145,6 +272,7 @@ def audit_documents(
                     lib_core,
                     adoption["shared_auth_lib_core_repository"],
                     adoption["shared_auth_lib_core_revision"],
+                    "shared-auth-lib-core",
                 )
             )
             if repo_name in set(adoption.get("flags2env_build_dependency_repositories", [])):
@@ -155,15 +283,17 @@ def audit_documents(
                         dependency(build_deps, "flags2env"),
                         adoption["flags2env_repository"],
                         runtime["strict_flags2env_revision"],
+                        "flags2env",
                     )
                 )
             evidence["flags2env_revision"] = flags.get("rev") if flags else None
             evidence["shared_auth_lib_core_revision"] = lib_core.get("rev") if lib_core else None
 
     hard = [item for item in results if item["state"] == "failed"]
+    blocked = [item for item in results if item["state"] == "blocked"]
     return {
         "repository": repo,
-        "state": "failed" if hard else "passed",
+        "state": "failed" if hard else "blocked" if blocked else "passed",
         "findings": results,
         "evidence": evidence,
     }
@@ -180,13 +310,18 @@ class GitHubAPI:
                 "Accept": "application/vnd.github+json",
                 "Authorization": f"Bearer {self.token}",
                 "X-GitHub-Api-Version": "2022-11-28",
-                "User-Agent": "shared-auth-runtime-adoption-audit/1",
+                "User-Agent": "shared-auth-runtime-adoption-audit/2",
             },
         )
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
                 payload = response.read()
-                return response.status, json.loads(payload) if payload else None
+                if not payload:
+                    return response.status, None
+                try:
+                    return response.status, json.loads(payload)
+                except json.JSONDecodeError:
+                    return 0, {"message": "GitHub returned non-JSON success payload"}
         except urllib.error.HTTPError as error:
             payload = error.read()
             try:
@@ -194,35 +329,78 @@ class GitHubAPI:
             except json.JSONDecodeError:
                 body = {"message": payload.decode("utf-8", errors="replace")}
             return error.code, body
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            return 0, {"message": f"GitHub request unavailable: {type(error).__name__}"}
 
 
-def fetch_text(api: GitHubAPI, owner: str, repo: str, branch: str, path: str) -> tuple[str, str | None]:
+def fetch_text(
+    api: GitHubAPI,
+    owner: str,
+    repo: str,
+    commit_sha: str,
+    path: str,
+) -> tuple[str, str | None, str | None]:
     encoded = urllib.parse.quote(path, safe="/")
-    status, body = api.request(f"/repos/{owner}/{repo}/contents/{encoded}?ref={urllib.parse.quote(branch, safe='')}")
+    status, body = api.request(
+        f"/repos/{owner}/{repo}/contents/{encoded}?ref={urllib.parse.quote(commit_sha, safe='')}"
+    )
     if status == 404:
-        return "missing", None
+        return "missing", None, None
     if status != 200 or not isinstance(body, dict) or body.get("encoding") != "base64":
-        return "blocked", None
+        return "blocked", None, None
+    blob_sha = body.get("sha")
+    if not is_sha(blob_sha):
+        return "blocked", None, None
     try:
-        return "present", base64.b64decode(body["content"]).decode("utf-8")
-    except (KeyError, ValueError, UnicodeDecodeError):
-        return "blocked", None
+        return "present", base64.b64decode(body["content"]).decode("utf-8"), blob_sha
+    except (KeyError, TypeError, ValueError, binascii.Error, UnicodeDecodeError):
+        return "blocked", None, None
 
 
 def audit_repository(api: GitHubAPI, owner: str, repo_name: str, authority: dict[str, Any]) -> dict[str, Any]:
+    repo = f"{owner}/{repo_name}"
     status, metadata = api.request(f"/repos/{owner}/{repo_name}")
     if status != 200 or not isinstance(metadata, dict):
         return {
-            "repository": f"{owner}/{repo_name}",
+            "repository": repo,
             "state": "blocked",
-            "findings": [finding(f"{owner}/{repo_name}", "repository_metadata", status, 200, "blocked")],
+            "findings": [finding(repo, "repository_metadata", status, 200, "blocked")],
             "evidence": {},
         }
-    branch = str(metadata.get("default_branch") or "main")
+
+    metadata_findings: list[dict[str, Any]] = []
+    if metadata.get("archived") is True:
+        metadata_findings.append(finding(repo, "repository:archived", True, False))
+    if metadata.get("disabled") is True:
+        metadata_findings.append(finding(repo, "repository:disabled", True, False))
+
+    branch = metadata.get("default_branch")
+    if not isinstance(branch, str) or not branch:
+        return {
+            "repository": repo,
+            "state": "blocked",
+            "findings": metadata_findings
+            + [finding(repo, "repository:default_branch", branch, "non-empty branch name", "blocked")],
+            "evidence": {},
+        }
+
+    commit_status, commit_body = api.request(
+        f"/repos/{owner}/{repo_name}/commits/{urllib.parse.quote(branch, safe='')}"
+    )
+    commit_sha = commit_body.get("sha") if isinstance(commit_body, dict) else None
+    if commit_status != 200 or not is_sha(commit_sha):
+        return {
+            "repository": repo,
+            "state": "failed" if metadata_findings else "blocked",
+            "findings": metadata_findings
+            + [finding(repo, "repository:default_branch_sha", commit_sha or commit_status, "readable commit SHA", "blocked")],
+            "evidence": {"default_branch": branch},
+        }
+
     runtime = authority["runtime"]
-    policy_state, policy_text = fetch_text(api, owner, repo_name, branch, runtime["policy_path"])
-    alias_state, _ = fetch_text(api, owner, repo_name, branch, runtime["legacy_policy_path"])
-    cargo_state, cargo_text = fetch_text(api, owner, repo_name, branch, "Cargo.toml")
+    policy_state, policy_text, policy_blob = fetch_text(api, owner, repo_name, commit_sha, runtime["policy_path"])
+    alias_state, _, alias_blob = fetch_text(api, owner, repo_name, commit_sha, runtime["legacy_policy_path"])
+    cargo_state, cargo_text, cargo_blob = fetch_text(api, owner, repo_name, commit_sha, "Cargo.toml")
     report = audit_documents(
         repo_name,
         policy_text if policy_state == "present" else None,
@@ -230,17 +408,27 @@ def audit_repository(api: GitHubAPI, owner: str, repo_name: str, authority: dict
         authority,
         alias_present=alias_state == "present",
     )
-    report["evidence"].update({
-        "default_branch": branch,
-        runtime["policy_path"]: policy_state,
-        runtime["legacy_policy_path"]: alias_state,
-        "Cargo.toml": cargo_state,
-    })
+    report["findings"].extend(metadata_findings)
+    report["evidence"].update(
+        {
+            "default_branch": branch,
+            "default_branch_sha": commit_sha,
+            runtime["policy_path"]: policy_state,
+            f"{runtime['policy_path']}:blob_sha": policy_blob,
+            runtime["legacy_policy_path"]: alias_state,
+            f"{runtime['legacy_policy_path']}:blob_sha": alias_blob,
+            "Cargo.toml": cargo_state,
+            "Cargo.toml:blob_sha": cargo_blob,
+        }
+    )
     if "blocked" in {policy_state, alias_state, cargo_state}:
-        report["state"] = "blocked"
         report["findings"].append(
-            finding(report["repository"], "runtime_adoption:read", "blocked", "readable repository evidence", "blocked")
+            finding(repo, "runtime_adoption:read", "blocked", "readable immutable repository evidence", "blocked")
         )
+
+    hard = [item for item in report["findings"] if item["state"] == "failed"]
+    blocked = [item for item in report["findings"] if item["state"] == "blocked"]
+    report["state"] = "failed" if hard else "blocked" if blocked else "passed"
     return report
 
 
@@ -251,17 +439,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--soft-fail", action="store_true")
     args = parser.parse_args(argv)
 
+    try:
+        authority = json.loads(Path(args.authority).read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"cannot read runtime-adoption authority: {type(error).__name__}", file=sys.stderr)
+        return 2
+    authority_errors = validate_authority(authority)
+    if authority_errors:
+        for error in authority_errors:
+            print(f"invalid runtime-adoption authority: {error}", file=sys.stderr)
+        return 2
+
     token = os.environ.get("GH_TOKEN", "").strip()
     if not token:
         print("GH_TOKEN is required for the runtime-adoption audit", file=sys.stderr)
         return 2
-    authority = json.loads(Path(args.authority).read_text(encoding="utf-8"))
-    adoption = authority.get("runtime_adoption")
-    if not isinstance(adoption, dict) or adoption.get("schema") != "shared-auth/runtime-adoption/v1":
-        print("unsupported or missing runtime_adoption authority", file=sys.stderr)
-        return 2
 
-    owner = str(adoption.get("owner", "shared-auth"))
+    adoption = authority["runtime_adoption"]
+    owner = adoption["owner"]
     repos = sorted(authority["runtime"]["consumer_repositories"])
     api = GitHubAPI(token)
     reports = [audit_repository(api, owner, repo, authority) for repo in repos]
