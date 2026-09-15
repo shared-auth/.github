@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import copy
 import importlib.util
 import unittest
 from pathlib import Path
@@ -14,6 +13,7 @@ spec.loader.exec_module(scanner)
 
 FLAGS_REV = "b708a041531a830bd49f030250836896096e7abd"
 LIB_REV = "29cdb6e53e888c3f157f1371e6169fe8c3561be2"
+OTHER_REV = "e48a8f006ab4a1221217d61e1a983ccc99e0da8e"
 RUNTIME = "shared-auth-web-server.rs"
 CLI = "shared-auth-cli"
 AUTHORITY = {
@@ -38,7 +38,7 @@ AUTHORITY = {
         "flags2env_build_dependency_repositories": [CLI],
     },
 }
-VALID_CARGO = f'''[package]\nname = "fixture"\nversion = "0.1.0"\n[dependencies]\nflags2env = {{ git = "https://github.com/flags-2-env/flags-2-env", rev = "{FLAGS_REV}" }}\nshared-auth-lib-core = {{ git = "https://github.com/shared-auth/shared-auth-lib-core.git", rev = "{LIB_REV}" }}\n'''
+VALID_CARGO = f'''[package]\nname = "fixture"\nversion = "0.1.0"\n[dependencies]\nflags2env = {{ git = "https://github.com/flags-2-env/flags-2-env", rev = "{FLAGS_REV}" }}\nshared-auth-lib-core = {{ git = "https://github.com/shared-auth/shared-auth-lib-core.git", rev = "{LIB_REV}" }}\nores-transport = {{ git = "https://github.com/ORESoftware/ores-transport.git", rev = "{OTHER_REV}" }}\n'''
 CLI_CARGO = VALID_CARGO + f'''\n[build-dependencies]\nflags2env = {{ git = "https://github.com/flags-2-env/flags-2-env", rev = "{FLAGS_REV}" }}\n'''
 
 
@@ -94,6 +94,28 @@ class CargoOverrideTests(unittest.TestCase):
     def test_12_non_runtime_repo_is_ignored(self):
         report = scanner.audit_documents("shared-auth-docs", None, None, None, AUTHORITY)
         self.assertEqual(report["state"], "passed")
+
+    def test_13_any_git_dependency_requires_rev(self):
+        cargo = VALID_CARGO.replace(f'rev = "{OTHER_REV}"', 'branch = "main"')
+        found = controls(audit(cargo=cargo))
+        self.assertIn("cargo_override:git_dependency_rev", found)
+        self.assertIn("cargo_override:git_dependency_selector:branch", found)
+
+    def test_14_git_tag_selector_is_rejected_even_with_rev(self):
+        cargo = VALID_CARGO.replace(f'rev = "{OTHER_REV}"', f'rev = "{OTHER_REV}", tag = "v1"')
+        self.assertIn("cargo_override:git_dependency_selector:tag", controls(audit(cargo=cargo)))
+
+    def test_15_git_path_selector_is_rejected(self):
+        cargo = VALID_CARGO.replace(f'rev = "{OTHER_REV}"', f'rev = "{OTHER_REV}", path = "crate"')
+        self.assertIn("cargo_override:git_dependency_selector:path", controls(audit(cargo=cargo)))
+
+    def test_16_git_url_must_be_credential_free_https(self):
+        cargo = VALID_CARGO.replace("https://github.com/ORESoftware/ores-transport.git", "http://token@example.invalid/ores-transport.git")
+        self.assertIn("cargo_override:git_dependency_url", controls(audit(cargo=cargo)))
+
+    def test_17_target_git_dependency_is_allowed_when_immutable(self):
+        cargo = VALID_CARGO + f'''\n[target.'cfg(unix)'.dependencies]\nores-otel-web = {{ git = "https://github.com/ores-otel/ores.otel.log", rev = "{'a'*40}" }}\n'''
+        self.assertNotIn("cargo_override:git_dependency_rev", controls(audit(cargo=cargo)))
 
 
 if __name__ == "__main__":
