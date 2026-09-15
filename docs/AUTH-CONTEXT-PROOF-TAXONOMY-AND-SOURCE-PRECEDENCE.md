@@ -295,7 +295,7 @@ As of 2026-09-14, important work is intentionally split across separate changes 
 - canonical Supabase/Neon target schema still has migration deltas from the executable server schema;
 - exact-head hosted CI frequently receives zero executed steps in the current environment, so local/independent evidence must be labeled honestly and cannot be represented as CI execution.
 
-A document or contract test is not production migration evidence. A merged schema is not deployed behavior. A model proof is not automatically a proof of independently written runtime implementations. A provider configuration target is not evidence that the provider resource exists. A valid config file is not evidence that a runtime has loaded it.
+A document or contract test is not production migration evidence. A merged schema is not deployed behavior. A model proof is not automatically a proof of independently written runtime implementations. A provider configuration target is not evidence that a provider resource exists. A valid config file is not evidence that a runtime has loaded it.
 
 ## Rules for future documents
 
