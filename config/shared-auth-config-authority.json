@@ -36,6 +36,8 @@
     ]
   },
   "runtime": {
+    "policy_path": ".shared-auth.toml",
+    "legacy_policy_path": ".auth-shared.toml",
     "flags_path": ".cli-flags.toml",
     "strict_flags2env_revision": "b708a041531a830bd49f030250836896096e7abd",
     "consumer_repositories": [
@@ -50,6 +52,18 @@
       "shared-auth-server.rs"
     ]
   },
+  "runtime_adoption": {
+    "schema": "shared-auth/runtime-adoption/v1",
+    "owner": "shared-auth",
+    "interfaces_repository": "https://github.com/shared-auth/shared-auth-interfaces",
+    "interfaces_revision": "f62d9dbed2db6774dda04586328e6c485423fff6",
+    "flags2env_repository": "https://github.com/flags-2-env/flags-2-env",
+    "shared_auth_lib_core_repository": "https://github.com/shared-auth/shared-auth-lib-core.git",
+    "shared_auth_lib_core_revision": "29cdb6e53e888c3f157f1371e6169fe8c3561be2",
+    "flags2env_build_dependency_repositories": [
+      "shared-auth-cli"
+    ]
+  },
   "invariants": [
     "consumer policy filenames never own fleet topology",
     "fleet topology never becomes a secret store or argv parser",
@@ -57,6 +71,9 @@
     "canonical and compatibility policy filenames may not coexist",
     "intended runtime consumers carry the canonical policy overlay and canonical flags contract",
     "Rust runtime consumers pin the reviewed strict flags2env revision before policy loading",
+    "runtime consumers use the exact reviewed shared-auth-interfaces policy revision",
+    "runtime consumers structurally pin the reviewed shared-auth-lib-core revision",
+    "Cargo dependency evidence is parsed as TOML and cannot be satisfied by comments or unrelated strings",
     "topology authority is explicit and repository-scoped"
   ]
 }

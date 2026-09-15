@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shared-auth.github.io/schemas/runtime-adoption-audit-v1.schema.json",
+  "title": "Shared Auth runtime adoption audit v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "authority_schema",
+    "owner",
+    "repository_count",
+    "failed_count",
+    "blocked_count",
+    "state",
+    "repositories"
+  ],
+  "properties": {
+    "schema": {"const": "shared-auth/runtime-adoption-audit/v1"},
+    "authority_schema": {"const": "shared-auth/config-authority/v1"},
+    "owner": {"type": "string", "minLength": 1},
+    "repository_count": {"type": "integer", "minimum": 0},
+    "failed_count": {"type": "integer", "minimum": 0},
+    "blocked_count": {"type": "integer", "minimum": 0},
+    "state": {"enum": ["passed", "failed", "blocked"]},
+    "repositories": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/repositoryResult"}
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "control", "state", "actual", "expected"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "control": {"type": "string", "minLength": 1},
+        "state": {"enum": ["failed", "blocked"]},
+        "actual": {},
+        "expected": {}
+      }
+    },
+    "repositoryResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "state", "findings", "evidence"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "state": {"enum": ["passed", "failed", "blocked"]},
+        "findings": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/finding"}
+        },
+        "evidence": {"type": "object"}
+      }
+    }
+  }
+}
