@@ -38,6 +38,7 @@ jobs:
           set -euo pipefail
           python3 -m unittest scripts/test_audit_shared_auth_config_authority.py
           python3 -m unittest scripts/test_audit_shared_auth_runtime_adoption.py
+          python3 -m unittest scripts/test_audit_shared_auth_cargo_overrides.py
       - name: Require a least-privilege organization audit credential
         shell: bash
         run: |
@@ -80,6 +81,18 @@ jobs:
             args+=(--soft-fail)
           fi
           python3 scripts/audit-shared-auth-runtime-adoption.py "${args[@]}"
+      - name: Audit Cargo source override bypasses
+        shell: bash
+        run: |
+          set -euo pipefail
+          args=(
+            --authority config/shared-auth-config-authority.json
+            --output artifacts/shared-auth-cargo-overrides-audit.json
+          )
+          if [[ "${{ inputs.soft_fail || false }}" == "true" ]]; then
+            args+=(--soft-fail)
+          fi
+          python3 scripts/audit-shared-auth-cargo-overrides.py "${args[@]}"
       - name: Print bounded machine-readable evidence
         if: always()
         shell: bash
@@ -96,4 +109,8 @@ jobs:
           if [[ -f artifacts/shared-auth-runtime-adoption-audit.json ]]; then
             jq '{schema, authority_schema, owner, repository_count, failed_count, blocked_count, state}' \
               artifacts/shared-auth-runtime-adoption-audit.json
+          fi
+          if [[ -f artifacts/shared-auth-cargo-overrides-audit.json ]]; then
+            jq '{schema, authority_schema, owner, repository_count, failed_count, blocked_count, state}' \
+              artifacts/shared-auth-cargo-overrides-audit.json
           fi
