@@ -141,6 +141,17 @@ def audit_documents(
                 findings.append(base.finding(repo, "cargo_override:replace", "present", "absent"))
             for table_name in DEPENDENCY_TABLES:
                 findings.extend(scan_dependency_table(repo, repo_name, table_name, cargo.get(table_name), authority))
+            workspace = cargo.get("workspace")
+            if isinstance(workspace, dict):
+                findings.extend(
+                    scan_dependency_table(
+                        repo,
+                        repo_name,
+                        "workspace.dependencies",
+                        workspace.get("dependencies"),
+                        authority,
+                    )
+                )
             targets = cargo.get("target")
             if isinstance(targets, dict):
                 for target_scope, target_table in targets.items():
