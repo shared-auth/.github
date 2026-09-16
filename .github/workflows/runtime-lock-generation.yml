@@ -1,72 +1,36 @@
-name: Shared Auth runtime lock generation
+name: Shared Auth runtime Zed lock generation
 
 on:
   pull_request:
     paths:
       - .github/workflows/runtime-lock-generation.yml
+      - config/runtime-zpkg-generation/**
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: shared-auth-runtime-lock-generation-${{ github.ref }}
+  group: shared-auth-runtime-zpkg-lock-generation-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   generate:
     name: ${{ matrix.slug }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - slug: cli
-            repository: shared-auth/shared-auth-cli
-            ref: audit/zed-runtime-metadata-20260915
-          - slug: customer-web
-            repository: shared-auth/shared-auth-web-server.rs
-            ref: audit/zed-runtime-metadata-20260915
-          - slug: customer-api
-            repository: shared-auth/shared-auth-api-server.rs
-            ref: audit/zed-runtime-metadata-20260915
-          - slug: admin-web
-            repository: shared-auth/shared-auth-admin-web-server.rs
-            ref: audit/zed-runtime-metadata-20260915
-          - slug: admin-api
-            repository: shared-auth/shared-auth-admin-api-server.rs
-            ref: audit/zed-runtime-metadata-20260915
+        slug: [cli, customer-web, customer-api, admin-web, admin-api]
     env:
-      GH_TOKEN: ${{ secrets.SHARED_AUTH_ORG_AUDIT_TOKEN }}
       ZED_PKG_INTERACTIVE: "false"
     steps:
-      - name: Require read-only organization credential
-        shell: bash
-        run: |
-          set -euo pipefail
-          : "${GH_TOKEN:?Configure SHARED_AUTH_ORG_AUDIT_TOKEN as a least-privilege read credential}"
-
-      - name: Check out exact runtime metadata branch
+      - name: Check out content-addressed generation inputs
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          repository: ${{ matrix.repository }}
-          ref: ${{ matrix.ref }}
-          path: repo
-          token: ${{ secrets.SHARED_AUTH_ORG_AUDIT_TOKEN }}
           persist-credentials: false
           fetch-depth: 1
-
-      - name: Configure private Git reads
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh auth setup-git
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30
-        with:
-          toolchain: "1.95.0"
 
       - name: Install pinned Zed CLI v0.3.0
         shell: bash
@@ -87,42 +51,28 @@ jobs:
           install -m 0755 "$zed_bin" "$HOME/.local/bin/zed"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Generate and verify Zed lock
-        working-directory: repo
+      - name: Generate and freeze Zed lock
         shell: bash
         run: |
           set -euo pipefail
+          work="$RUNNER_TEMP/zpkg-${{ matrix.slug }}"
+          mkdir -p "$work"
+          cp "config/runtime-zpkg-generation/${{ matrix.slug }}.zpkg.toml" "$work/.zpkg.toml"
+          cd "$work"
           zed --version
           zed validate
           zed install
           test -s .zpkg.lock
           zed validate --require-lock
           zed install --frozen
+          mkdir -p "$GITHUB_WORKSPACE/out/${{ matrix.slug }}"
+          cp .zpkg.lock "$GITHUB_WORKSPACE/out/${{ matrix.slug }}/.zpkg.lock"
+          sha256sum .zpkg.toml .zpkg.lock > "$GITHUB_WORKSPACE/out/${{ matrix.slug }}/SHA256SUMS"
 
-      - name: Generate and verify Cargo lock
-        working-directory: repo
-        shell: bash
-        run: |
-          set -euo pipefail
-          cargo generate-lockfile
-          test -s Cargo.lock
-          cargo metadata --locked --no-deps --format-version 1 >/dev/null
-          git diff --check -- .zpkg.lock Cargo.lock
-
-      - name: Stage generated evidence only
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "out/${{ matrix.slug }}"
-          cp repo/.zpkg.lock "out/${{ matrix.slug }}/.zpkg.lock"
-          cp repo/Cargo.lock "out/${{ matrix.slug }}/Cargo.lock"
-          sha256sum "out/${{ matrix.slug }}/.zpkg.lock" "out/${{ matrix.slug }}/Cargo.lock" \
-            > "out/${{ matrix.slug }}/SHA256SUMS"
-
-      - name: Upload generated locks
+      - name: Upload generated Zed lock
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: shared-auth-runtime-locks-${{ matrix.slug }}
+          name: shared-auth-zpkg-lock-${{ matrix.slug }}
           path: out/${{ matrix.slug }}/
           if-no-files-found: error
           retention-days: 7
