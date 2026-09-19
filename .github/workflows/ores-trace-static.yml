@@ -1,6 +1,7 @@
 name: ORES static trace markers
 on: { pull_request: {}, workflow_call: {} }
 permissions: { contents: read }
+
 jobs:
   static-ids:
     runs-on: ubuntu-24.04
@@ -8,9 +9,80 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with: { persist-credentials: false }
-      - name: Enforce static ORES IDs
+
+      - name: Enforce static ORES ID compatibility
         shell: bash
         run: |
           node <<'NODE'
-          const cp=require('node:child_process'),fs=require('node:fs');const F=cp.execFileSync('git',['ls-files','-z']).toString().split('\0').filter(Boolean).filter(p=>/\.(?:[cm]?[jt]s|tsx|jsx|rs|dart|go|java|kt|kts)$/.test(p)&&!/(?:^|\/)(?:generated|target|vendor|node_modules|build|dist)(?:\/|$)/.test(p));const T=/^ores-trace-[A-Za-z0-9_-]{21}$/,R=/^ores-routine-[A-Za-z0-9_-]{21}$/,E=[];for(const p of F){fs.readFileSync(p,'utf8').split(/\r?\n/).forEach((l,i)=>{if(/dd-trace-[A-Za-z0-9_-]+/.test(l))E.push(`${p}:${i+1}: legacy dd-trace`);for(const m of l.matchAll(/\b(?:addTraceId|addTrace|add_trace_id|add_trace)\s*\(\s*["']([^"']+)["']/g))if(!T.test(m[1]))E.push(`${p}:${i+1}: invalid static trace ID`);if(/\b(?:const|let|var|static)\b[^=\n]*=\s*["']ores-trace-/.test(l))E.push(`${p}:${i+1}: hoisted static trace ID`);for(const m of l.matchAll(/["'](ores-routine-[A-Za-z0-9_-]+)["']/g))if(!R.test(m[1]))E.push(`${p}:${i+1}: invalid routine ID`);});}if(E.length){console.error(E.join('\n'));process.exit(1)}console.log(`validated ${F.length} files`)
+          'use strict';
+          const cp = require('node:child_process');
+          const fs = require('node:fs');
+
+          // Wire/runtime compatibility remains 12..64. ORES generators mint a
+          // canonical 21-character suffix, but generator width is not admission.
+          const TRACE = /^ores-trace-[A-Za-z0-9_-]{12,64}$/;
+          const ROUTINE = /^ores-routine-[A-Za-z0-9_-]{12,64}$/;
+          const GENERATED_TRACE = /^ores-trace-[A-Za-z0-9_-]{21}$/;
+          const GENERATED_ROUTINE = /^ores-routine-[A-Za-z0-9_-]{21}$/;
+
+          const sourceExt = /\.(?:[cm]?[jt]s|tsx|jsx|rs|dart|go|java|kt|kts)$/;
+          const skippedDir = /(?:^|\/)(?:generated|target|vendor|node_modules|build|dist|coverage|tests?|testdata|fixtures|__tests__|__mocks__|\.r2g)(?:\/|$)/;
+          const files = cp.execFileSync('git', ['ls-files', '-z'])
+            .toString()
+            .split('\0')
+            .filter(Boolean)
+            .filter((path) => sourceExt.test(path) && !skippedDir.test(path));
+
+          if (files.length === 0) {
+            throw new Error('ORES static trace admission refused: no implementation source files were checked');
+          }
+
+          // Pin both invariants independently: compatibility boundaries and the
+          // narrower current generator convention.
+          for (const width of [11, 12, 20, 21, 22, 41, 64, 65]) {
+            const expected = width >= 12 && width <= 64;
+            if (TRACE.test(`ores-trace-${'A'.repeat(width)}`) !== expected) throw new Error(`trace compatibility self-test failed at width ${width}`);
+            if (ROUTINE.test(`ores-routine-${'A'.repeat(width)}`) !== expected) throw new Error(`routine compatibility self-test failed at width ${width}`);
+          }
+          if (!GENERATED_TRACE.test(`ores-trace-${'A'.repeat(21)}`) || GENERATED_TRACE.test(`ores-trace-${'A'.repeat(20)}`)) throw new Error('trace generator-width self-test failed');
+          if (!GENERATED_ROUTINE.test(`ores-routine-${'A'.repeat(21)}`) || GENERATED_ROUTINE.test(`ores-routine-${'A'.repeat(22)}`)) throw new Error('routine generator-width self-test failed');
+
+          const findings = [];
+          const isComment = (line) => {
+            const value = line.trimStart();
+            return value.startsWith('//') || value.startsWith('/*') || value.startsWith('*') || value.startsWith('<!--') || value.startsWith('# ');
+          };
+
+          for (const path of files) {
+            const text = fs.readFileSync(path, 'utf8');
+            if (text.includes('ores-trace-contract:ignore-file')) continue;
+
+            text.split(/\r?\n/).forEach((line, index) => {
+              if (isComment(line)) return;
+              const lineNo = index + 1;
+
+              if (/dd-trace-[A-Za-z0-9_-]+/.test(line)) findings.push(`${path}:${lineNo}: legacy dd-trace marker`);
+              if (/\b(?:addRoutine|add_routine)\s*\(/.test(line)) findings.push(`${path}:${lineNo}: use addRoutineId/add_routine_id`);
+
+              for (const match of line.matchAll(/\b(?:addTraceId|addTrace|add_trace_id|add_trace)\s*\(\s*["']([^"']+)["']/g)) {
+                if (!TRACE.test(match[1])) findings.push(`${path}:${lineNo}: invalid static trace ID; expected ores-trace + 12..64 compatible characters`);
+              }
+
+              // Static trace ids stay inline at the call site. Routine ids may be
+              // declared once per function and reused.
+              if (/\b(?:const|let|var|static|final|val)\b[^=\n]*=\s*["']ores-trace-[A-Za-z0-9_-]+["']/.test(line)) {
+                findings.push(`${path}:${lineNo}: hoisted static trace ID`);
+              }
+
+              for (const match of line.matchAll(/["'](ores-routine-[A-Za-z0-9_-]+)["']/g)) {
+                if (!ROUTINE.test(match[1])) findings.push(`${path}:${lineNo}: invalid routine ID; expected ores-routine + 12..64 compatible characters`);
+              }
+            });
+          }
+
+          if (findings.length) {
+            console.error(findings.join('\n'));
+            process.exit(1);
+          }
+          console.log(`validated ${files.length} implementation source files; compatibility=12..64, canonical-generator-width=21`);
           NODE
