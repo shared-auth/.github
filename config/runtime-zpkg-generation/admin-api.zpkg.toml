@@ -1,0 +1,28 @@
+[package]
+org = "shared-auth"
+name = "shared-auth-admin-api-server.rs"
+version = "0.1.0"
+description = "VPC-isolated Shared Auth super-admin JSON API server"
+language = "rust"
+
+[package.repository]
+vcs = "git"
+url = "https://github.com/shared-auth/shared-auth-admin-api-server.rs"
+
+[dependencies]
+"flags-2-env/flags-2-env" = "^0.3.0"
+"oresoftware/next-loggers" = "^0.1.0"
+"shared-auth/shared-auth-clients" = "^0.1.0"
+"shared-auth/shared-auth-lib-core" = "^0.1.0"
+
+[install]
+dir = ".vendor/.zed"
+
+[targets.rust]
+dir = "."
+adapter = "rust"
+
+[scripts]
+format = "cargo fmt --all -- --check"
+lint = "cargo clippy --all-targets --locked -- -D warnings"
+test = "cargo test --all-targets --locked"

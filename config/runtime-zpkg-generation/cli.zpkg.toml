@@ -1,0 +1,37 @@
+[package]
+org = "shared-auth"
+name = "shared-auth-cli"
+version = "0.1.0"
+description = "Command-line tooling for Shared Auth"
+license = "MIT"
+keywords = ["authentication", "cli", "oauth", "oidc"]
+language = "rust"
+
+[package.repository]
+vcs = "git"
+url = "https://github.com/shared-auth/shared-auth-cli"
+
+[dependencies]
+"flags-2-env/flags-2-env" = "^0.3.0"
+"oresoftware/ores-clis-core" = "^0.1.0"
+"shared-auth/shared-auth-lib-core" = "^0.1.0"
+
+[publish]
+include_readme = true
+tag_format = "v{version}"
+smoke_test = "test -f \"$ZED_PKG_TEST_TARGET/Cargo.toml\" && test -f \"$ZED_PKG_TEST_TARGET/src/main.rs\""
+exclude = [".env", ".env.*", ".direnv/**", ".zed/**", ".zed-pack/**", ".vendor/.zed/**", "target/**", "**/target/**", "**/*.log", ".DS_Store"]
+
+[install]
+dir = ".vendor/.zed"
+
+[targets.repository]
+dir = "."
+adapter = "none"
+
+[targets.rust]
+dir = "."
+adapter = "rust"
+
+[scripts]
+test = "cargo test --all-targets"

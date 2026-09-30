@@ -1,0 +1,41 @@
+[package]
+org = "shared-auth"
+name = "shared-auth-api-server.rs"
+version = "0.1.0"
+description = "JSON API server for Shared Auth using official clients and guards"
+license = "MIT"
+keywords = ["authentication", "api", "seaorm"]
+language = "rust"
+
+[package.repository]
+vcs = "git"
+url = "https://github.com/shared-auth/shared-auth-api-server.rs"
+
+[dependencies]
+"flags-2-env/flags-2-env" = "^0.3.0"
+"oresoftware/k8s-libs-and-shared-defs" = "^0.2.0"
+"oresoftware/ores-middleware" = "^0.1.0"
+"oresoftware/ores-transport" = "^0.1.0"
+"shared-auth/shared-auth-clients" = "^0.1.0"
+"shared-auth/shared-auth-lib" = "^0.1.1"
+"shared-auth/shared-auth-lib-core" = "^0.1.0"
+
+[publish]
+include_readme = true
+tag_format = "v{version}"
+smoke_test = "test -f \"$ZED_PKG_TEST_TARGET/src/auth.rs\" && test -f \"$ZED_PKG_TEST_TARGET/Cargo.toml\""
+exclude = [".env", ".env.*", ".direnv/**", ".zed/**", ".zed-pack/**", ".vendor/.zed/**", "target/**", "**/target/**", "**/*.log", ".DS_Store"]
+
+[install]
+dir = ".vendor/.zed"
+
+[targets.repository]
+dir = "."
+adapter = "none"
+
+[targets.rust]
+dir = "."
+adapter = "rust"
+
+[scripts]
+test = "cargo test --all-targets --locked"
