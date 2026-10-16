@@ -27,7 +27,8 @@
       },
       "database_scope": "none",
       "lifecycle": "unverified",
-      "review_status": "inferred-needs-review"
+      "review_status": "inferred-needs-review",
+      "visibility": "public"
     },
     {
       "repository": "shared-auth/shared-auth.github.io",
@@ -47,7 +48,8 @@
       },
       "database_scope": "none",
       "lifecycle": "unverified",
-      "review_status": "inferred-needs-review"
+      "review_status": "inferred-needs-review",
+      "visibility": "public"
     }
   ]
 }
