@@ -15,3 +15,9 @@ Every listed repository declares `category`, `trust_domain`, `source_authority`,
 ## Registry maintenance
 
 Keep all public repositories listed in public registries; if the `.github` repository itself is private, reconcile the full authorized organization inventory. A repository rename, new service, privileged capability, deploy target, or DB scope change requires a reviewed update. Ensure no duplicate repository keys, check schema validation, and do not convert `unverified` to `reviewed` without supporting evidence.
+
+## Automated admission checks
+
+The `.github/workflows/repository-taxonomy.yml` workflow checks every PR and main-branch push against `scripts/validate_repository_taxonomy.py` using only Python standard-library code. It validates schema, inventory visibility labels, unique org-owned repository names, admin web/API/MCP role-to-admin-DB consistency, disallows public-app to admin-DB access, and rejects unreviewed deployment/identity/release identifiers. Regression fixtures run on every check. Once a deployable admin role is marked reviewed, its VPC, environment, and cloud identity must be explicit, and reviewed admin roles may not share a VPC.
+
+`review_evidence` is a provenance declaration, **not an independently verified GitHub approval**. Before marking any privileged metadata reviewed, protect this workflow as a required status check and configure appropriate organization/branch rules and independent reviewers. Private inventory verification requires a private registry and cannot be proven from the public subset.
