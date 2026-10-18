@@ -26,6 +26,13 @@ jobs:
           test -n "${RUNNER_OS:-}"
           printf 'runner=%s os=%s arch=%s sha=%s run_id=%s attempt=%s\n'             "${RUNNER_NAME}" "${RUNNER_OS}" "${RUNNER_ARCH}"             "${GITHUB_SHA}" "${GITHUB_RUN_ID}" "${GITHUB_RUN_ATTEMPT}"
 
+      - name: Check out exact canary head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+          show-progress: false
+
       - name: Test zero-step evidence classifier
         run: python3 tests/test_stepful_actions_evidence.py -v
 
