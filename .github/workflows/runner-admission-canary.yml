@@ -17,6 +17,8 @@ jobs:
     name: hosted-runner-admission
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    env:
+      ORES_ACTIONS_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Prove a hosted runner actually started
         shell: bash
@@ -33,6 +35,12 @@ jobs:
           persist-credentials: false
           show-progress: false
 
+      - name: Prove checkout is the exact source head
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${ORES_ACTIONS_SOURCE_SHA}"
+
       - name: Test zero-step evidence classifier
         run: python3 tests/test_stepful_actions_evidence.py -v
 
@@ -46,7 +54,8 @@ jobs:
               "schema": "shared-auth.actions-admission/v1",
               "status": "stepful",
               "repository": os.environ["GITHUB_REPOSITORY"],
-              "sha": os.environ["GITHUB_SHA"],
+              "source_sha": os.environ["ORES_ACTIONS_SOURCE_SHA"],
+              "event_sha": os.environ["GITHUB_SHA"],
               "run_id": int(os.environ["GITHUB_RUN_ID"]),
               "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
               "runner_name": os.environ["RUNNER_NAME"],
@@ -61,7 +70,7 @@ jobs:
       - name: Retain admission evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: runner-admission-${{ github.sha }}-${{ github.run_attempt }}
+          name: runner-admission-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/actions-admission.json
           if-no-files-found: error
           retention-days: 14
