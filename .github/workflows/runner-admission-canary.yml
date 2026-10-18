@@ -1,0 +1,57 @@
+name: runner-admission-canary
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/runner-admission-canary.yml"
+      - "scripts/verify-stepful-actions-evidence.py"
+      - "tests/test_stepful_actions_evidence.py"
+      - "docs/ACTIONS-RUNNER-ADMISSION.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hosted-admission:
+    name: hosted-runner-admission
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Prove a hosted runner actually started
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${RUNNER_NAME:-}"
+          test -n "${RUNNER_OS:-}"
+          printf 'runner=%s os=%s arch=%s sha=%s run_id=%s attempt=%s\n'             "${RUNNER_NAME}" "${RUNNER_OS}" "${RUNNER_ARCH}"             "${GITHUB_SHA}" "${GITHUB_RUN_ID}" "${GITHUB_RUN_ATTEMPT}"
+
+      - name: Emit stepful admission receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib
+          receipt = {
+              "schema": "shared-auth.actions-admission/v1",
+              "status": "stepful",
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "sha": os.environ["GITHUB_SHA"],
+              "run_id": int(os.environ["GITHUB_RUN_ID"]),
+              "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+              "runner_name": os.environ["RUNNER_NAME"],
+              "runner_os": os.environ["RUNNER_OS"],
+              "runner_arch": os.environ["RUNNER_ARCH"],
+          }
+          path = pathlib.Path(os.environ["RUNNER_TEMP"]) / "actions-admission.json"
+          path.write_text(json.dumps(receipt, sort_keys=True, separators=(",", ":")) + "\n")
+          print(path)
+          PY
+
+      - name: Retain admission evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runner-admission-${{ github.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/actions-admission.json
+          if-no-files-found: error
+          retention-days: 14
