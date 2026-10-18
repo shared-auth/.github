@@ -20,6 +20,27 @@ GitHub accepted the rerun request and created replacement job
 with `steps: null`. Therefore the current state is still **NOT_EXECUTED**.
 It is neither a contract pass nor a contract failure.
 
+## Scope narrowed by the 2026-10-18 canary
+
+The exact-head canary on this public `shared-auth/.github` repository succeeded
+stepfully at source head
+`2a4dca4c1000d608b24ad0a6c2121e7d0a19fbb9`:
+
+- workflow run: `39142793758`;
+- job: `117720470239`;
+- every canary step completed successfully;
+- retained artifact:
+  `runner-admission-2a4dca4c1000d608b24ad0a6c2121e7d0a19fbb9-1`.
+
+At the same time, exact-head jobs observed in the private
+`shared-auth-interfaces`, `shared-auth-server.rs`, and
+`shared-auth-formal` repositories still complete with `steps: null`.
+Therefore the evidence does **not** support a global GitHub-hosted-runner
+outage. Recovery investigation should focus on the private-repository admission
+path (for example eligible private-repo hosted capacity, billing/usage, policy,
+or repository-specific restrictions) without guessing which administrative
+cause is responsible.
+
 ## Canary contract
 
 `.github/workflows/runner-admission-canary.yml` is intentionally tiny. A
