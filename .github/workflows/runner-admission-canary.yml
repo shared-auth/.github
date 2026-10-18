@@ -27,7 +27,7 @@ jobs:
           printf 'runner=%s os=%s arch=%s sha=%s run_id=%s attempt=%s\n'             "${RUNNER_NAME}" "${RUNNER_OS}" "${RUNNER_ARCH}"             "${GITHUB_SHA}" "${GITHUB_RUN_ID}" "${GITHUB_RUN_ATTEMPT}"
 
       - name: Test zero-step evidence classifier
-        run: python3 -m unittest -v tests/test_stepful_actions_evidence.py
+        run: python3 tests/test_stepful_actions_evidence.py -v
 
       - name: Emit stepful admission receipt
         shell: bash
