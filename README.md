@@ -1,5 +1,7 @@
 # shared-auth organization defaults
 
+**Scripting policy:** [Rust is required for scripts](CONTRIBUTING.md#rust-first-scripts-and-automation); Python application-code exceptions require explicit documentation.
+
 This public `.github` repository is the canonical home for **shared-auth** organization profile content, community-health defaults, contribution guidance, issue and pull-request templates, reusable policy checks, and public agent-safety declarations.
 
 - GitHub organization: https://github.com/shared-auth
