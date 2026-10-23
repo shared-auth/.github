@@ -11,3 +11,11 @@
 /env/enc/ @ORESoftware
 /deploy/ @ORESoftware
 /migrations/ @ORESoftware
+
+# Explicit taxonomy admission and verifier owners.
+/repository-taxonomy.json @ORESoftware
+/repository-taxonomy.schema.json @ORESoftware
+/REPOSITORY_TAXONOMY.md @ORESoftware
+/scripts/validate_repository_taxonomy.py @ORESoftware
+/.github/workflows/repository-taxonomy.yml @ORESoftware
+/docs/TAXONOMY_ADMISSION_ENFORCEMENT.md @ORESoftware
